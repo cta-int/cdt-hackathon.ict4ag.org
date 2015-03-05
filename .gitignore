@@ -1,0 +1,5 @@
+# Ignore local config
+/wp-local-config.php
+
+# Ignore user generated content
+/wp-content/uploads

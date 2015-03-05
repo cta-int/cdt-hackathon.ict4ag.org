@@ -1,0 +1,27 @@
+/*
+* ICT4AG
+* Copyright 2013, eAulivier - Guus Schiefelbusch
+* www.eaulivier.nl
+* 10/14/2013
+*/
+
+h2.logo a, h1.logo a {
+    color: #72B626;
+    font-size: 20px;
+    margin: 0;
+}
+
+.post ul {
+	list-style: disc outside;
+	padding-left: 30px;
+	margin: 12px 0;
+}
+
+.social-icons {
+	margin: 20px 0 0 0;
+}
+
+#contact-details {
+	margin-right: 110px;
+	margin-top: -25px;
+}
