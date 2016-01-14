@@ -1,14 +1,14 @@
 === Hupso Share Buttons for Twitter, Facebook & Google+ ===
 Contributors: kasal
 Donate link: http://www.hupso.com/
-Tags: twitter, facebook, google, social sharing, share buttons, social share buttons, share icons, stumbleupon, addthis, sharethis, sexybookmarks, addtoany, multisite, pinterest, print, tumblr
+Tags: twitter, facebook, google, social sharing, share buttons, social share buttons, share icons, stumbleupon, addthis, sharethis, sexybookmarks, addtoany, multisite, pinterest, print, tumblr, bebo, social media, social buttons, social share, email, print button, social plugin, social widget, email button, post, plus 1, vkontakte, vk.com, reddit, delicous, del.icio.us, linkedin, tumblr, pinterest, stumbleupon, digg, stumble upon, pinterest button, +1, google +1, tweet, like, share, sharing, shortcode
 Requires at least: 2.8
-Tested up to: 3.6.1
-Stable tag: 3.9.21
+Tested up to: 4.2.2
+Stable tag: 4.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Help visitors share your posts on popular social networks: Twitter, Facebook, Google+, Linkedin, Pinterest, StumbleUpon, Tumblr, Reddit and others.
+Help share your posts on popular social networks: Twitter, Facebook, Google+, Linkedin, Pinterest, StumbleUpon, Tumblr, Reddit, Bebo and others.
 
 == Description ==
 
@@ -20,7 +20,7 @@ These services are used by millions of people every day, so sharing your content
 
 * Slick, minimalistic design.
 * Very small and fast. The code for sharing button is very small (only a few KB), so share buttons will not slow down your website - even on devices with slow network connections.
-* All major social networks are supported: Twitter, Facebook (Facebook Share / Facebook Like / Facebook Send), Google Plus, Linkedin, Tumblr, Pinterest, StumbleUpon, Digg, Reddit, Bebo, Delicious, VKontakte, Odnoklassniki, Sina Weibo, QZone.
+* All major social networks are supported: Twitter, Facebook (Facebook Share / Facebook Like / Facebook Send), Google Plus, Linkedin, Tumblr, Pinterest, StumbleUpon, Digg, Reddit, Bebo, Delicious, VKontakte, Odnoklassniki, Sina Weibo, QZone, Renren.
 * Social media counters: Twitter Tweet, Facebook Like, Google +1, Linkedin Share, Pinterest - Pin it 
 * Compatible with all major web browsers: Firefox, Chrome, Internet Explorer, Safari, Opera.
 * Share toolbar works with desktop and mobile devices (mobile phones and tablets). Tested with PC, Apple iOS / iPhone / iPad and Google Android devices.
@@ -60,7 +60,7 @@ You can configure share buttons in plugin settings.
 
 **Translations**
 
-Plugin is currently translated into: Czech, Traditional Chinese, Simplified Chinese.
+Plugin is currently translated into: French, Czech, Polish, Arabic, Traditional Chinese, Simplified Chinese and Dutch (Nederlands / Belgium).
 If you would like to translate into your language, send message [here](http://www.hupso.com/share/feedback/).
 
 
@@ -86,7 +86,7 @@ Yes. Thay are free and will always be free. And you do not need to open any acco
 
 = Are share buttons using Javascript? =
 
-Yes. Javascript is required for sharing buttons to function properly and it must be enabled. Counters load javascript code from Twitter, Facebook, Google, Linkedin, Pinterest or from other social services that are selected. Interface for share buttons is loaded from our servers via javascript at run-time. This enables us to add minor enhancements and fix browser bugs the moment they are discovered without forcing you to upgrade the plugin all the time. Some button images are loaded from your local Wordpress installation and some from our servers. 
+Yes. Javascript is required for sharing buttons to function properly and it must be enabled. Counters load javascript code from Twitter, Facebook, Google, Linkedin, Pinterest or from other social services that are selected. Interface for share buttons is loaded from our servers via javascript at run-time. This enables us to add minor enhancements and fix browser bugs the moment they are discovered without forcing you to upgrade the plugin all the time. Some button images are loaded from your local Wordpress installation and some from our servers. Clicks on share icons can be redirected to target social network throught our servers. One of the benefits of such setup is that share buttons keep working properly, even when there are API changes at social networking sites. This can be a major advantage for websites that do not plan to update plugins regularly.
 
 = How can I hide/show share buttons for specific posts? =
 
@@ -196,6 +196,15 @@ Hide share image (from settings) and add this CSS to your style.css file:
 
 Then adjust the values so that it looks great with your theme. 
 
+= How can I increase the space between the buttons? =
+
+Add this CSS to your style.css file:
+
+`.hupso_c > div > a > img {
+    padding-right: 7px !important;
+}`
+
+
 = Facebook like button is seen through my top navigation bar while other buttons are ok. How can fix it? =
 
 Add this CSS to your style.css file:
@@ -239,6 +248,16 @@ It is missing if your site is running from localhost. It will work when you move
 = Can I set share buttons in such a way that it counts the entire site instead of just that specific page? =
 
 Yes, you can. Enter your website root under "Custom url" in Settings. After that counters will show sharing stats for your whole website, not for each page individually.
+
+= Email button does not seem to work on some devices. Nothing happens when I click on it. What can I do? =
+
+Clicking on e-mail button invokes default e-mail application on the device. If default e-mail application is not set up, it will not do anything.
+On Firefox and Chrome you can use web based e-mail (such as gmail.com or outlook.com) as your default e-mail application if you like, so
+clicking on the email icons will open your web based e-mail account.
+
+[Firefox instructions](https://support.mozilla.org/en-US/kb/change-program-used-open-email-links)
+
+[Chrome instructions](https://support.google.com/chrome/answer/1382847?hl=en#content)
 
 = Buttons are not working properly. What can I do? =
 
@@ -285,6 +304,33 @@ Please send bug reports and suggestion using [this feedback form](http://www.hup
 
 
 == Changelog ==
+
+= 4.0.3 =
+* Added Arabic translation
+
+= 4.0.2 =
+* Added French translation
+
+= 4.0.1 =
+* Added Polish translation
+* Compatible with Wordpress 4.2.2
+
+= 4.0.0 =
+* Added Russian share image
+* Compatible with Wordpress 4.2.1
+* Improved compatibility with theme Twenty Fifteen
+
+= 3.9.25 =
+* Shortcodes with custom urls are now working properly (example: [hupso url="http://www.yahoo.com"])
+
+= 3.9.24 =
+* Added Dutch (Nederlands / Belgium) translation
+
+= 3.9.23 =
+* Fix for using echo do_shortcode('[hupso]') inside the loop
+
+= 3.9.22 =
+* Renren button
 
 = 3.9.21 =
 * Sina Weibo button
