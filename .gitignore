@@ -1,3 +1,5 @@
+.idea
+
 # Ignore local config
 /wp-local-config.php
 

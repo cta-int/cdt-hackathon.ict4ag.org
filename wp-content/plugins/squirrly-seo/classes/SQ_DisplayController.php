@@ -17,16 +17,20 @@ class SQ_DisplayController {
      * echo the css link from theme css directory
      *
      * @param string $uri The name of the css file or the entire uri path of the css file
-     * @param string $media
+     * @param string $params : trigger, media
      *
      * @return string
      */
-    public static function loadMedia($uri = '', $media = 'all', $params = null) {
-	if (strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER ['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'))
+    public static function loadMedia($uri = '', $params = array('trigger' => true, 'media' => 'all')) {
+        if (isset($_SERVER['PHP_SELF']) && strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false)
             return;
 
         $css_uri = '';
         $js_uri = '';
+        $local = true;
+        if (!isset($params['media'])) {
+            $params['media'] = 'all';
+        }
 
         if (isset(self::$cache[$uri]))
             return;
@@ -48,29 +52,33 @@ class SQ_DisplayController {
             elseif (strpos($uri, '.js') !== FALSE) {
                 $js_uri = $uri;
             }
+            $local = false;
         }
+
 
 
         if ($css_uri <> '') {
-            wp_enqueue_style($name, $css_uri, null, SQ_VERSION_ID);
+            if (!wp_style_is($name)) {
+                wp_enqueue_style($name, $css_uri, null, SQ_VERSION_ID, $params['media']);
+            }
+
+            if (isset($params['trigger']) && $params['trigger'] === true) {
+                wp_print_styles(array($name));
+            }
         }
 
         if ($js_uri <> '') {
-            echo '<script type="text/javascript" src="' . $js_uri . '">' . (isset($params) ? $params : '') . '</script>' . "\n";
+            if (!wp_script_is($name)) {
+                wp_enqueue_script($name, $js_uri, null, SQ_VERSION_ID);
+            }
+            if (isset($params['trigger']) && $params['trigger'] === true) {
+                wp_print_scripts(array($name));
+            }
         }
-
     }
 
-    /**
-     * Called for any class to show the block content
-     *
-     * @param string $block the name of the block file in theme directory (class name by default)
-     *
-     * @return string of the current class view
-     */
-    public function output($block, $obj) {
+    public function setBlock($block) {
         self::$name = $block;
-        echo $this->echoBlock($obj);
     }
 
     /**
@@ -92,6 +100,16 @@ class SQ_DisplayController {
         }
     }
 
-}
+    /**
+     * Called for any class to show the block content
+     *
+     * @param string $block the name of the block file in theme directory (class name by default)
+     *
+     * @return string of the current class view
+     */
+    public function output($block, $obj) {
+        self::$name = $block;
+        echo $this->echoBlock($obj);
+    }
 
-?>
+}

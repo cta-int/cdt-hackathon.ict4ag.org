@@ -1,318 +1,446 @@
-﻿=== SEO Plugin by SQUIRRLY ===
-Contributors: florinmuresan, calinvingan, cifi
-Tags: seo,seo optimization,seo content,seo plugin,squirly,squirrley,wordpress seo,plugin,dutch,german,russian,romanian,search engine optimization,xml,sitemap,keyword,keyword research,post,posts,page,squirrly,tag,image,images,photos,flickr,statistics,google,content,title,description,favicon,apple,ios,andriod,mobile,canonical,author,googleplus,analytics,automation,admin,automatic seo,seo correction,seo title,seo meta
-Requires at least: 3.1
-Tested up to: 3.6.1
+﻿=== SEO by SQUIRRLY™ ===
+Contributors: cifi, calinvingan, florinmuresan
+Tags: seo,seo plugin,wordpress seo,seo optimization,seo content,plugin,content seo,search engine optimization,xml,sitemap,keyword,keyword research,post,posts,page,multisite,squirrly,wordpress,tag,image,images,photos,flickr,statistics,stats,google,content,title,description,favicon,mobile,canonical,author,google plus,analytics,admin,seo correction,seo title,seo meta,meta,google,twitter,news,blog,e-commerce,ecommerce,woocommerce,feed,feeds,marketing,buddypress,social,social media,url,automatic,iphone
+Requires at least: 3.5
+Tested up to: 4.4
 Stable tag: trunk
+Donate link: https://www.squirrly.co/wordpress-seo-by-squirrly
 
-Squirrly SEO Plugin is the Only SEO Tool that Allows You To Optimize Content And Measure Its Success. For Both Humans and Search Engines.
+SEO Plugin By Squirrly is for the NON-SEO experts. Get Excellent Seo with Better Content, Ranking and Analytics. For Both Humans and Search Bots.
 
 == Description ==
-<strong>Lets Face It. SEO is tough.</strong> How does Squirrly take the hard work out of SEO?
+**Thank you for all your wonderful feedback. We wish you Happy Holidays and a magnificent Happy New Year!**
+[youtube https://www.youtube.com/watch?v=I_HbBqdGry4]
 
-- <strong>Gives You SEO Advice as you're typing your articles.</strong> Squirrly helps you in real time to optimize your articles to 100%, while you are writing or editing them.
+Squirrly SEO helps you write content that is SEO friendly and ALSO Human friendly. You'll get to improve your rankings, while providing your readers with great content. See Your SEO Stats, get a weekly SEO Audit and find the best keywords.
+
+It works well with Wordpress sites that already have <strong>Yoast</strong> or <strong>All In One SEO</strong>. You can opt-in to keep those settings, so no need to start over again :-)
+
+Recommended by <strong><a href="http://www.quicksprout.com/university/how-to-maximize-your-seo-traffic-with-these-must-have-wordpress-plugins/" >Neil Patel</a></strong>, the co-founder of Kissmetrics and Crazy Egg. Also by <strong>Brian Dean</strong> and over 100 content marketing experts
+
+[youtube https://www.youtube.com/watch?v=mEjrE7TuDDc]
+
+See all the Squirrly SEO 2016 features at: http://howto.squirrly.co/category/sides/
+
+Based on the topic you're writing about, the interface will light up green while you're editing your text, so that you know you've done something right. When all the lights are green, you can publish it, because your text has excellent SEO and it's 100% optimized.
+
+Different customers, from areas such as e-commerce, law firms, digital agencies, online magazines, movie review sites, etc. have reported +285% increase in the number of readers, by optimizing their content with this seo plugin, and by measuring and improving as advized by our tool.
+
+All-In-All: Squirrly SEO will help you get a tool that acts like an Expert Consultant, sitting right next to you, advising on SEO, and telling you where you need to improve.
+
+The best things is: YOU DON'T have to be an SEO expert to use it. Wait, you don't even need to know about all that. Squirrly will help you write great content, will show you where your Wordpress needs improvements and it will even help you learn all about content marketing and seo strategies through email trainings.
+
+Squirrly SEO is a Freemium software, like MailChimp.
+
+You’ll start with the free version of Squirrly SEO. It will help you if you have small content marketing needs, such as 5 articles published / month, 5 keyword analysis and a weekly audit report. When you'll require more, you can pay for the PRO Plan.
+
+-<strong>Gives You SEO Advice as you're typing your articles.</strong> Squirrly helps you in real time to optimize your articles to 100%, while you are writing or editing them.
+
+- <strong>Green lights turn on everytime you do something right.</strong> When all the lights turn green, you can publish or schedule the article because it has excellent seo.
 
 - <strong>Optimized articles get +285% traffic,</strong> on average (real statistics from over 16,500 people who participated in the survey).
 
-- <strong>Finds you Keywords and Topics that your Customers actively search for</strong> and which will help you out-rank your competitors, not just follow them around
+- <strong>SEO Settings remain</strong>. If you already made your SEO settings for WordPress with other plugins, you can keep using those and Squirrly won't override them. No need to start all over. We'd hate to have you do that.
+
+- <strong>Finds you Keywords and Topics that your Customers actively search for</strong> and which will help you out-rank your competitors, not just follow them around the serps
+
 - <strong>The algorithm for Keyword analysis</strong> takes into accounts elements that will help you find suitable keywords for content optimization: for Humans and for Search Engines.
 
-- <strong>Tracks all the aspects of your Content Marketing Strategy:</strong> Blogging, Traffic, SEO, Social Signals, Links, Authority. Every single week you get a report by email.
+- <strong>Tracks all the aspects of your Content Marketing Strategy:</strong> Blogging, Traffic, SEO, Social Signals, Links, Authority. Every single week you get a new report by email.
 
-- <strong>Send the Audit report by email</strong> to your content writer, SEO person, developers, etc.
+- <strong>Send the Audit report by email</strong> to your content writer, SEO person, developers, or to your boss.
 
 - <strong>It Gives You Professional Advice on How To Fix</strong> any of those areas that it helps track, so you can easily find out how to improve. Content from SEO Moz (recently just MOZ), Google, Authority Labs, etc.
 
-- <strong>Monitors Your Progress, week by week.</strong> You'll get interesting data about the historical performance of each article you write.
+- <strong>Monitors Your Progress, week by week.</strong> You'll get interesting data about the historical performance of each article you write and find out how to improve its seo ranking.
 
 - <strong>Analyze any single article. See how it improves over time.</strong>
 
 - <strong>Optimize Your Content for Humans.</strong> We've recently added tools and lessons (free of charge) that will help you optimize all of your Content for Humans, not just for search engines.
 
-- <strong>Stay up to date with your SEO and Social Signals, with our Email Alerts</strong>. We send out email alerts if something on your wordpress site needs immediate attention, so that you can act upon it and save your business the trouble.
+- <strong>Write Better Content.</strong> We help you build up seo content that is also great-to-read for Human readers and helps you build up some valuable and subtle SEO.
 
-- <strong>Free Images that You Can Use.</strong>
+- <strong>Stay up to date with your SEO and Social Signals, with our Email Alerts</strong>. We send out email alerts if something on your Wordpress site needs immediate attention, so that you can act upon it and save your business the trouble.
 
-- <strong>Social Intelligence through the Inspiration Box, to help you write better content, by showing you recent tweets about your subject, how other journalists and bloggers have approached your topic. All of this in your "Add New Post" interface.</strong>
+- <strong>Copyright-Free Images That You Can Use.</strong>
 
+- <strong>Headline Suggestions based on your SEO keyword.</strong>
 
+- <strong>Social Intelligence through the Inspiration Box, to help you write better content. Shows you recent tweets about your subject, how other journalists and bloggers have approached your topic. All of this in your "Add New Post" interface.</strong>
 
+You can use Squirrly SEO for FREE and if you have small content marketing needs (about one article posted per week, some keywords that you want to analyze), then it's the perfect plan for you.
 
-<strong>You Only Pay Us If You Love Us. Otherwise You Can Use Squirrly for Free.</strong>
-
-You’ll start with the full version of Squirrly. If in 14 Days, you decide you love to get all the benefits from Squirrly, you pay for it (Pricing Plans below). If not, then you will continue using the <strong>Free Version</strong> of our Content Marketing tool, no questions asked.
-
-
-
-
-<em>"Wow ,I've been using your tool for a week now and one of my blog ranked no1 out of a million for its key word... amazing"</em>
+Once you start having bigger content marketing and SEO needs (more than one article posted per week), you can go PRO. Read more about it in the FAQ section.
 
 <h3>Reviews</h3>
+
+* <em>"Wow, I've been using your tool for a week now and one of my blog ranked no1 out of a million for its key word... amazing"</em>
+
 * <em>"You can be confident that without ever leaving your Add New Blog page you have a strong keyword, good and current content, and your post will be 100% optimized for the search engines."</em> - <strong>Jason Fox Marketing</strong>
 
 * <em>"Features that exceed the stereotypical plugin"</em> - <strong>Robert, Yieldkit</strong>
 
-* <em>"It's amazing! seeing a huge boost in traffic"</em>
+* <em>"It's amazing! Seeing a huge boost in traffic"</em>
 
 * <em>"Great SEO info at a click"</em>
 
-<strong>You can read reviews from Internet Marketing experts on http://www.squirrly.co/reviews-pag68312.html</strong>
+<strong>You can read reviews from Internet Marketing experts on http://howto.squirrly.co/testimonials/</strong>
 
-More than helping you with your internet marketing efforts, we strive to offer Excellence in Customer Service.
+Over 1,000,000 Downloads. Our startup consists of 10 content marketing professionals dedicated to making Squirrly an amazing piece of software and writing great training materials to help you be successful and stay successful.
 
-- we have a Free Coaching session with 14 lessons and 10 actionable work files, awaiting you after you install the plugin and connect to squirrly.co
+Over 550 Content Marketing Experts have reviewed our Wordpress SEO plugin and loved it.
 
-- you'll be able to get support from us from the plugin, from our Facebook, our Twitter, email and we can even schedule a Skype call.
+Over 2500 students to our $147 Content Marketing Training on Udemy. Part of that training you'll be receiving for free when signing up for this Wordpress seo plugin.
+
+over +285% increase in traffic to over 49,000 survey participants.
+
+Recently our team grew to 10 people. More than helping you with your internet marketing efforts, we strive to offer Excellence in Customer Service.
+
+* we have a Free Training session with 14 lessons and 10 actionable work files, awaiting you after you install the plugin and connect to squirrly.co (you'll receive them by email)
+
+* you'll be able to get support from us from the plugin, from our Facebook, our Twitter, email and we can even schedule a Skype call, if fixes are needed
 
 We're passionate about seeing you get a great and happy experience, so we'll do our best to fix anything that may come up very fast.
 
 The <a title="Squirrly SEO in Delivering Happiness" href="http://www.deliveringhappiness.com/everyday-happiness-florin-squirrly-and-how-theyre-making-happy-work/" target="_blank">Delivering Happiness</a> blog featured us for this.
 
-
 We're glad to have you,
 Florin Muresan
-Founder and CEO Squirrly UK
+CEO of Squirrly
 
-
-See all the Features of our product on the <a href="/extend/plugins/squirrly-seo/faq/" title="Squirrly Wordpress SEO"> FAQ Section </a>.
+See all the Features of our product on the <a href="http://howto.squirrly.co/category/sides/" title="Squirrly WordPress SEO"> All Squirrly SEO Features </a>.
 
 <a href="/extend/plugins/squirrly-seo/screenshots/" title="Squirrly SEO Plugin">Check our screenshots</a>
- | <a href="http://www.squirrly.co" title="Squirrly SEO" target="_blank">Go to our official site</a> | Free Version OR <a href="http://www.squirrly.co/pricing" title="See Pricing" target="_blank">Pricing Plans</a>
+ | <a href="http://howto.squirrly.co/" title="Squirrly SEO" target="_blank">Go to our official site</a> | Free Version (if you install from the WP directory) OR <a href="http://howto.squirrly.co/squirrly-pricing-plans/" title="See Pricing" target="_blank">Pricing Plans</a>
 
 == Installation ==
-1. Log In as an Admin on your Wordpress blog.
+1. Log In as an Admin on your WordPress blog.
 2. In the menu displayed on the left, there is a "Plugins" tab. Click it.
 3. Now click "Add New".
 4. There, you have the buttons: "Search | Upload | Featured | Popular | Newest". Click "Upload".
 5. Upload the squirrly-seo.zip file.
 6. After the upload is finished, click Activate Plugin.
-7. In the menu on the left, there is the "Squirrly" tab now. Click it.
+7. Good. Now enter your email to connect with Squirrly.co
 8. Then click "Write a New Post with Squirrly Seo".
-9. Done. Type a keyword to the right of the screen and start using Squirrly Seo :) Enjoy!
+9. Done. Start getting Excellent SEO on Wordpress
+10. The Email Lessons will help you become a great content marketer. Our content Marketing Class on Udemy has over 600 students and the price is $147. You're getting all that for free, by email.
+
+Type a keyword to the right of the screen and start using Squirrly Seo. Enjoy!
 
 == Screenshots ==
-1. Enter a keyword for Squirrly Live SEO Assistant optimization
-2. Find out if it's worth it to use it
-3. Add an image in your article
-4. Find images, tweets, wiki, blogs, news or other articles from your blog
-5. Easy to read external blogs
-6. Easy to insert paragraphs from the articles that you are reading
-7. Optimize your article with Squirrly Live SEO Assistant
-8. You will know when your seo is good
-9. Squirrly Article Rank for each post/page. Traffic, Social, Inbound Links and Google Ranking.
-10. Squirrly Seo settings tab with extra Seo optimization features
+1. Seo - Optimize your article with SEO Live Assistant
+2. Seo - Find the top keywords with the Keyword Researh
+3. Seo - Customize the META with the SEO Snippet
+4. Seo - Find your top posts and authors with Squirrly Analytics
+5. Seo - Monitor your success with the Performance Analytics
+6. Seo - Let Squirrly do the SEO Settings that your blog needs
+7. Seo - Check your Weekly Site Audit and improve to get higher scores
 
+== Upgrade Notice ==
+Squirrly 5.2.8 it's a stable version of Squirrly SEO and has all the SEO requirements by Search Engines
 
 == Changelog ==
-= 2.1.4 =
-* Update the Traffic Bot List
-* Fixed database bugs for the traffic records
+= 5.3.1 =
+* Added the Twitter Summary Type option in Squirrly > SEO > Twitter Card
+* Fixed the same Title SEO issues for some WP themes
+* Fixed small bugs
 
-= 2.1.3 =
-* Optimized Squirrly SEO for a faster load
-* Fixed minor bugs in the theme's css files
-* Added Alexa Meta Tool in Squirrly SEO Settings
-* Updated the bot list in SEO Squirrly Article Rank
+= 5.2.9 =
+* Optimized the way SEO is loading in every page
+* Optimized SEO for Instapage Plugin
+* Updated the Google Analytics Tracking code
+* Fixed the compatibility issue in Performance Analytics
+* Added twitter summary for large images
 
-= 2.1.2 =
-* Added unique SEO (title and description) for the author, tag and category pages
-* Fixed Open Graph image size and image url for a better view in facebook and google
-* Fixed some deprecated functions
-* Wordpress 3.6.1 compatibility
 
-= 2.1.1 =
-* Fixed absolute path for images in feed
-* Fixed unique title and description for categories and pages
-* Fixed local save images minor bug
-* Fixed keyword saving for main domain optimization
-* Changed the blog limit and optimization limit for the free account
-* Added the weekly SEO audit for all accounts
+= 5.2.8 =
+* Compatible with WP 4.4
 
-= 2.1.0 =
-* Added Squirrly Live Assistant for both Visual and HTML editors
-* Added Squirrly SEO for custom post types
-* Compatible with the Wordpress version 3.6
-* Fixed the type delay for Seo Live Assistant
+= 5.2.7 =
+* Added Squirrly SEO Canonical Link in Post Edit page
+* Added Norway country in Google Rank Option
+* Set the Squirrly SEO Snippet OG image as shared image
+* Set Squirrly SEO Live Assistant to work with more multilanguage plugins
+* Fixed the images in Squirrly Inspiration Box
 
-= 2.0.8 =
-* Added the Spanish (es_ES) translation in Squirly SEO
-* Added the French (fr_FR) translation in Squirly SEO
-* Fixed the custom SEO Title and Description notification in posts list
-* Changed the default SEO Settings
-* Fixed image insert in editor
-* Fixed minor bug that appeared on plugin activation
-* Fixed Squirrly SEO local save for remote images
+= 5.2.6 =
+* Compatible with Smart Security Tools plugin
+* Added the google.ee in Squirrly Rank Option
+* Fixed the Squirrly SEO Keyword not to be added in Tags if is switched off in Squirrly > Settings
 
-= 2.0.7 =
-* Added the Squirrly SEO Traffic Progress report
-* Fixed minor frontend bugs
-* Fixed the date in sitemap for tags
+= 5.2.5 =
+* Improved the Squirrly SEO Keyword Research
+* Fixed the sitemap.xml with videos included
+* Changed to relative url in sitemap.xml for multisites
 
-= 2.0.6 =
-(stable)
-* Fixed header issue for remote requests
-* Added SSL connection to https://my.squirrly.co
-* Fixed post list loading issue in some cases
-* Fixed Squirrly SEO Status Info for expired trial version
+= 5.2.3 =
+* Compatible with Wordpress 4.3.1
+* Fixed the Seo Live Assistant to verify keywords with commas
+* Fixed the Seo Live Assistant to work with HTTPS dashboard for Wikis and Keyword suggestion
+* Fixed the OG:image:width issue when the width is null
+* Fixed the HTTPS connection when the general settings are not set correctly
+* Fixed minor bug
+* Updated to the last on-page SEO requirements
+* Increased the Squirrly speed in post editor
 
-= 2.0.5 =
-* Fixed Squirrly SEO loading loop when all posts are not public in All posts
-* Add default message in SEO Article Rank when adding a new Post/Page
-* Added support options in Squirrly SEO Settings
-* Added the Russian (ru_RU) translation in Squirly SEO
-* Added the Brazilian (pt_BR) translation in Squirly SEO
-* Check calls for HTTPS when curl protocol could not support that
 
-= 2.0.4 =
-* Added Custom Title/Description option in all Post/Pages
-* Added SEO check if custom title is entered in Post/Page
-* Added SEO check for META customization with other plugins
-* Custom META notification in All Posts
-* Added Dashboard page in Squirrly SEO Tab
-* Added Account information, Blog status in dashboard
-* Added affiliate option and images in Squirrly SEO Tab
-* Validate remote images on save post to prevent bad images integration
-* Compatible with Twitter search 1.1
-* Changed the Sign-up messages
-* Changed the timeout for remote API requests
+= 5.2.2 =
+* Add the last google updates for JSON-LD Structured Data
+* Make sitemap.xml work for a large number of articles
 
-= 2.0.3 =
-* Added attributes informations for copyright free images
-* Improved the Keyword Research results with competition results
-* Improved custom META description and keywords
+= 5.2.1 =
+* Compatible with Wordpress 4.3
+* Fixed the Head Buffer for some themes
 
-= 2.0.2 =
-* Fixed minor Squirrly SEO Rank Bugs
-* Fixed minor Snippet/Settings issues
-* Added the Squirrly Keyword Suggestion in Squirrly Rank
+= 5.2.0 =
+* Compatible with Wordpress 4.2.4
+* Added 17 more languages in Squirrly SEO Keyword Research
+* Added the focused language for Social Media in Squirrly > SEO
+* Added Squirrly SEO Performance Analytics in custom post types selected from Squirrly SEO > Settings
+* Add top menu link for Rank check
 
-= 2.0.1 =
-* Added Squirrly SEO Rank in Post/Page lists
-* Added Traffic progress monitor for each post/page
-* Added Social Impact progress monitor for each post/page
-* Added Inbound Links progress monitor for each post/page
+= 5.1.6 =
+* Compatible with WP 4.2.3
+* Improved the rank check to prevent Google temporary IP block
+* Improved the plugin speed in backend
+* Fixed the Incorrect Hreflang META implementation
+* Add the optimization progress bar in the post/page list
+* Fixed the restore the settings from backup validator
 
-= 1.1.9 =
-* Added Facebook META Object for a good looking share
-* Added Twitter Card in META
-* Fixed local saved post images bugs
-* Fixed Sitemap file permission error
-* Wordpress 3.6 theme compatibility
-* Fixed Frontend custom meta for blogs with pages
+= 5.1.4 =
+* Fixed the Google Rank check cron
 
-= 1.1.8 =
-* Fixed snipped security bugs
-* SEO improvement for META Title
+= 5.1.3 =
+* Fixed the Open Graph META for Locale en_CA
+* Fixed the sitemap_pages.xml for loading slow when looking over videos
+* Fixed the favicon.ico rewrite for non multisite wordpress
 
-= 1.1.7 =
-* Added the real time snippet before you publish the article
+= 5.1.2 =
+* Added new features in Open Graph for the Posts/Pages
+* Added the SEO Settings Backup and Restore
+* Improved the SEO Live Assistant to recognize more languages and chars
+* Improved the communication with the API Server
+* Fixed the Analytics notification bar
+* Fixed the wp_is_writable for older wp versions
+* Fixed the Open Graph not to include non embed videos in meta
+* Fixed the Sitemap Ping option to remain switched on when is selected
 
-= 1.1.6 =
-* Fixed settings bugs on saving
+= 5.1.1 =
+* Corrected the css for the top yellow bar
+* Get the keyword from database for the saved article
+* Fixed the feed style issue
+* Added the custom size image for Open Graph in Squirrly SEO Snippet
+* Increased the plugin loading speed in front-end
+* Fixed the post optimization history issue
+* Fixed the encryption for the password and fixed the bad login issue
+* Compatible with WP 4.2.2
 
-= 1.1.5 =
-* Added multiple Countries for Keyword Research
-* Changed the Squirrly SEO Settings Look
+= 5.0.3 =
+* Prevent canonical, prev, next meta duplicate inserted by other SEO plugins
+* Fixed snippet custom title and description to change when other SEO plugins are installed
+* Fixed javascript issue in login page
 
-= 1.1.4 =
-* Fixed Frontend META and Frontend ob_gzhandler (for login problems)
-* Added new feature for SEO Live Assistant (minimum words in article for google news)
+= 5.0.2 =
+* Made it download the remote images while in text editor
+* Detects remote images when the URL doesn't contain http
+* Fixed favicon disappear on plugin updates
 
-= 1.1.3 =
-* Added multi-language support in SEO Live Assistant
-* Improved compatibility with other SEO plugins and themes
-* Improved META information
+= 5.0.1 =
+* Fixed some issues for the PHP 5.1-5.2
+* Compatible with WP 4.2.1
 
-= 1.1.2 =
-* Now works with Ecommerce plugins WooCommerce, MarketPress, Ready!, Shopp
+= 5.0.0 =
+* Changed Squirrly SEO look
+* Compatible with WP eCommerce plugin
+* Made SEO improvements for Woocommerce plugin
+* Interactive learning for the entire Squirrly SEO plugin
+* Faster post save for long text and remote images
+* Settings and SEO check improved
+* Added robots.txt for multisites with security
+* Added sitemap for multisites
+* Added sitemap for images and videos for each article
+* Added the Json LD in Structured Data META
+* Added the social linked Data for Json LD and publisher
+* Added the favicon.ico for multisites
+* Added the icos for apple devices
+* Added the SEO progress in post editor
+* Added the SEO Star option in Dashboard
+* Fixed bugs for multisites and made it compatible with WP 4.2
+* Fixed the snippet title and description special chars
+* Fixed the custom fields variable in post editor
+* Fixed the site icon and added the site icon for multisites
+* Fixed Sitemap for default permalink option
 
-= 1.1.0 =
-* Stable version of Squirrly SEO (as we just finished with the beta)
-* WordPress 3.5 compatibility
+= 3.4.4 =
+* Updated the Twitter Card information
+* Compatible with WP 4.1.1
+* Fixed the SEO Analytics and the Rank updates
+* Fixed the SEO for First Page  if the Home Page is not a static page
+* Fixed the SEO for the First Page when it starts with woocommerce shop
 
-Also:
+= 3.4.3 =
+* Add the option to prevent downloading the remote images in the blog media library for the new posts
+* Add support for custom admin user roles
 
-* Fixed the most recent SEO bugs
-* Works nice on iOS and Android in the WP apps.
-* Works in the browsers of iOS and Android devices
-* On-boarding made much better
-* From now on we ping your posts to search engines, to get fast and better indexing
-* Seamless connection and integration between Squirrly.co and WP.
-* Added stats in the dashboard.
+= 3.4.2 =
+* Fixed some queries for a better speed in backend
+* Fixed Open Graph for Home Page
+* Fixed empty description for the Woocommerce shop page
 
-= 1.0.9 =
-* Keyword Information has been made optional
-* Added the Keyword Research bar
-* Fixed article post error
-* Fixed issues for support and profile login
-* Added the German language (de_DE)
-* Added the Romanian language (ro_RO)
+= 3.3.9 =
+* Fixed SEO snippet preview compatibility with the WP 4.0
 
-= 1.0.8 =
-* Added the notification bar for Squirrly Live SEO Assistant
-* Added how many words to write for keyword density in Squirrly Live SEO Assistant
-* Added copyright free images in inspiration box
-* Added the google suggestion in search box
-* Added notification if no keyword is used
-* CSS changed for mobile (tested on Android and IOS)
-* Fixed issues for javascript
+= 3.3.8 =
+* Fixed SEO issues for some themes in frontend
+* Fixed the audit to load faster
+* Added the google hreflang meta for language identification
+* Added strict search for google in SEO Settings
 
-= 1.0.7 =
-* Fixed Seo Live Assistant bugs
+= 3.3.7 =
+* Fixed the keywords SEO settings for the first page optimization
+* Fixed the image resize on drag-drop from inspiration box
+* Fixed the highlight in Seo Live Assistant not to disappear when you click on keyword
+* Fixed the SEO check lag for meta duplicates in backend
 
-= 1.0.6 =
-* Automatically register on squirrly with email address
-* Fixed the fopen for remote request
+= 3.3.5 =
+* Added Tag to Meta Keyword option in Settings
+* Fixed some bugs related to SEO Audit
+* Fixed the og:image issue for featured post images in WP4
 
-= 1.0.4 =
-* Fixed the register URL and Login messages
+= 3.3.4 =
+* Compatible with WP 4.0
+* Fixed various issues
+* Update the Google Analytics tracking code to work with cache plugins
+* Fixed the sitemap update date issue
+* Fixed the Home Page Seo settings to work with the front-page snippet
+* Compatible with Wp Fastest Cache plugin, WP Super Cache
 
-= 1.0.3 =
-* Added Support and link to dashboard in Happiness bar
-* Changed the keyword suggestion design
-* Automatically add tag with the used seo keyword
+= 3.3.3 =
+* Added the new Google Analytics tracking code
+* Update the Seo Live Assistant
 
-= 1.0.2 =
-* Fixed PHP5 version check
-* Fixed Squirrly Login for PHP 5.0 version
-* Added Heading button in Tinymce editor
+= 3.3.2 =
+* Compatible with WP 3.9.2
+* Added google.cz for google ranking in Performance Analytics
 
-= 1.0.1 =
-* WordPress 3.4 compatibility
+= 3.3.1 =
+* Fixed post snippet issues when the home-page description is switch off
 
+* Updated the Squirrly Seo plugin icon
+
+= 3.3.0 =
+* Added the google localization country in search ranking
+* Fixed on-boarding video link
+* Fixed seo title issue for home-page
+
+= 3.2.7 =
+* Fixed small issue for background ranking grabber
+* Fixed google country select in Seo Settings
+* Fixed css and js load for some WordPress themes
+
+= 3.2.5 =
+* Fixed default country and langage in rank check
+* Fixed the Copyright Free search images
+
+= 3.2.3 =
+* Fixed onboarding process
+* Fixed Audit broken link
+* Fixed Rank check issues for some situations
+
+= 3.2.1 =
+* Improved SEO Stats for Google Rankings by Country
+* SEO Settings out-of-the-box, but also works awesome if you have the settings already done with All In One SEO or Yoast (Wordpress seo)
+
+= 3.1.9 =
+* Fixed css issues for some cases
+* Fixed the "See Analytics" loading issue
+
+= 3.1.8 =
+* Fixed serp cron with the google last changes
+* Changed the cron rate for serp search
+* Added force recheck for google rank in SEO Analytics
+
+= 3.1.4 =
+* Removed the traffic monitor (to increase the site speed and analytics)
+
+= 3.1.2 =
+* Compatible with WP 3.9
+* Fixed Squirrly SEO Live Assistant issue in WP 3.9
+* Fixed SEO Analytics in WP 3.9
+
+= 3.1.1 =
+* Added rel="prev" and rel="next" in header
+* Added SEO META Duplicates notification
+* Fixed the snippet for home page when the home is a specific page
+* Added more details in SEO Analytics
+*
+
+= 3.1.0 =
+* Added the Performance Analytics in Squirrly SEO Tab
+* Added Analytics filter for custom post types
+* Added Google SEO Rank Column in Squirrly SEO > Performance Analytics
+* Added Google Country Select in Squirrly SEO > Settings
 
 == Credits ==
-Florin Muresan CEO at Squirrly
-Calin Vingan CTO at Squirrly
+Florin Muresan - CEO at Squirrly
+Calin Vingan - CTO at Squirrly
+Andreea Leau - VP Marketing
+Cristina Leau  - Squirrly mascot designer
+Alexandra Nicola - Content Writer, future COO
+Tim - Content Writer
+Lynn Silva - Content Writer
+Teodora Vingan - SEO Analyser
+Ana Darstaru - Chief of Customer Service
+Lucian Nertan - VP of Agency
+Sorel Nagy- Developer
 
-And 3 Great collaborators:
-
-Andreea - creative marketing intern
-Bogdan - stylish designer
-Cristina  - Squirrly mascot designer
+Investors:
+Ibrahim Evsan, serial entrepreneur, one of the best known bloggers in Germany
+Philipp Kandal, co-Founder and CTO of Skobbler (recently aquired for $24M by Telenav)
 
 Many Thanks.
 
 == License ==
-Squirrly Seo has a Trial period of 14 Days, after which you may choose to buy a monthly subscription or keep using Squirrly for Free and be able to optimize 5 articles/month
+Squirrly is Free to use. The version from the WP directory will install the Free Version.
 
+You'll be able to use this seo software once you install the plugin and use your email to connect to Squirrly.co
+
+For higher content marketing and SEO needs, you can check our Official Site and see what the PRO Plan offers.
 
 == Frequently Asked Questions ==
-= How does Squirrly Wordpress SEO Plugin work? =
-Please watch the following video http://www.youtube.com/watch?v=ymh8DBKrfhw
+= I can't log into the Wordpress with my user. Get the message 'An error occured.' What can I do? =
+I see that your host server is not letting you to access our remote API.
+Please tell your web master to add the IPs 144.76.66.106 and 176.9.112.210 in the white-list for remote access and it should work.
+
+= How does Squirrly WordPress SEO Plugin work? =
+Neil Patel, the Co-Founder of Kissmetrics and Crazy Egg made a great video on how to use Squirrly's Live Assistant:
+http://www.quicksprout.com/university/how-to-maximize-your-seo-traffic-with-these-must-have-wordpress-plugins/
 
 = How does the META Description work in Squirrly SEO Optimization? =
-Based on your article, Squirrly will find the most relevant text and add it in META Description.
+Based on your article, Squirrly will find the most relevant text and add it in the META Description.
+
+You can opt-in to use the Squirrly Snippet in the Post/Page editor, which will allow you to customize how the META Title and Description will be. All while writing or editing your article.
+
+= Is Squirrly SEO Plugin free? =
+Yes, you just have to install the plugin from the WP directory into your site. Then connect with your email to Squirrly. The Free Version will automatically start. Read below for more. Once you have bigger content marketing needs, you can opt-in to upgrade to the PRO Plan.
+
+= Does the Free Plan offer all the features? =
+As of January 2015 the free plan will include the Lite version of our features. The paid version will open the PRO features. The free version has all a small Wordpress site or blog needs to get started with SEO and Content Marketing. These are the blogs on which owners want to publish about 5 articles / month. Also includes a general Audit of their whole site and want to see the SEO analytics for their last posts.
+
+= What about the PRO Plan? =
+The PRO Plan is for those with bigger content marketing and SEO needs. For anything regarding the paid plans, go to our website: http://howto.squirrly.co/squirrly-pricing-plans/
+
+The Wordpress directory listing is only to be used for concerns regarding the Free version. You can get the PRO Plan after you've installed the plugin from this directory.
 
 = Can I use squirrly seo on mobile? =
-Yes, on IOS and ANDROID, it works both through the browser and wordpress app
+Yes, on IOS and ANDROID, it works both through the browser and Wordpress app
 
 = Can I use the images, tweets and articles given by the Inspiration Box? Are there any legal concerns? =
 Yes, you can use the tweets and the paragraphs in your articles. They contain a link to the source and are perfectly legal to use. Of course, for the
 articles add only some paragraphs, not the whole article. As for the images, you can use the Copyright-Free images that we offer, to make sure you will
-not have any legal problems.
+not have any legal problems. Follow the license-compliance guidance we offer for each of them.
 
-= Do I get support for your Wordpress SEO Plugin? =
+= Do I get support for your WordPress SEO Plugin? =
 Yes, we are focused on Delivering Happiness and this comes along with a good support package. We have a track record of replying in under 5 hours to
 any request, no matter the time of day. And we also fix any problems which you may encounter very fast, so Squirrly is trust-worthy.
 
@@ -321,38 +449,65 @@ All of the features that we offer have been built having the customer's best int
 and we've proven time and again that we are a great team that knows all there is to know about good *SEO automation*. We had a community of 20,000 blogs that all
 used our SEO techniques, and they have gotten lots of hits from search engines due to our optimization. Now we offer the same quality for you:
 
+ [UPDATE] Squirrly now has over 1,000,000 downloads, so we've been offering great software for over two years now.
+
+- SEO Advice as you're typing your articles
+- Advice in real time from the SEO Live Assistant on how to write better content for your Human readers
+- Weekly SEO Audit report, that shows you how well you did on: Blogging, Traffic, Links, SEO, Social Media and Authority
+- Lots of advice in the reports for how you can fix each section
+- Keyword Research and Analysis (that takes data from both SEMrush AND Social Media)
+- Monitors your Site's Progress
+- SEO Analytics for each post or page
+- Shows you rank in Google
+- Shows you Social Signals for each article
+- Social Intelligence
+- Images you can use (with advice on License for each image. Most are Free to use)
+- Read Tweets, Wikis, Blogs
+- Insert Tweets, Wikis, Blogs
+- Headline Suggestions for your SEO Keyword or general topic
+- You'll be alerted if there are SEO issues, 404 errors, visibility problems
+- Search of images, tweets, wikis, blogs, etc. based on your keyword
+- As you type your article or edit older articles, you can set the META information for that article (using the Squirrly Snippet)
+- Facebook Open Graph support for both Images and Videos (if you have a video in your article, Squirrly will attach the open graph properties to it)
+- Twitter Cards
+- Customize your FavIcon
+- Adds the icon for Apple Devices
 - Google Analytics setup support
 - Google Webmaster Tools setup support
+- Google Json-LD Structured data
 - Google+ URL
 - Bing META Code support
 - Facebook META Code support
-- Automatically adds the correct seo title in the home page
-- Automatically adds the correct seo description and seo keywords in all pages
-- Automatically adds canonical link in all pages
-- Automatically adds the XML Sitemap for search engines: /sitemap.xml
-- Automatically PING the XML Sitemap in google blogs
-- Automatically adds the required METAs for home page (icon, author, language, dc publisher, etc.)
-- Automatically adds the favicon and the icon for Apple devices.
-- Automatically Support for Custom Post Types
+- adds the correct seo title in the home page
+- adds the correct seo description and seo keywords in all pages
+- adds canonical link in all pages
+- adds the XML Sitemap for search engines: /sitemap.xml
+- PING the XML Sitemap in google and bing
+- adds the required METAs for home page (icon, author, language, dc publisher, hreflang, etc.)
+- adds the favicon and the icon for Apple devices.
+- Support for Custom Post Types
 - Fine tune Page Navigational Links
 - Provides SEO Integration for WP e-Commerce sites
 - Support for CMS-style WordPress installations
-- Automatically optimizes your titles for search engines
+- optimizes your titles for search engines
 - Generates META tags automatically
 - For beginners, all these settings are made automatically to get the best SEO possible.
 - For advanced users, you can fine-tune everything.
 - You can override any title and set any META description and any META keywords you want.
-- Real Time Snippet Preview
-- Integrated with other Ecommerce Plugins like WooCommerce, MarketPress, Ready!, Shopp
+- Real Time Snippet Preview (checks the frontend of each article, not just a preview)
+- Integrated with other Ecommerce Plugins like WooCommerce, WP Ecommerce, MarketPress, Ready!, Shopp
 - Compatibility with all the other plugins, like Auto Meta, Ultimate Tag Warrior and others.
+- Works best with multisites
+- SEO error check and fix the META duplicates
 
 And the best ones that we have (and the others don't):
-
- - *Keyword research and Analysis*: find the keywords that are easier to rank for
- - *SEO Live Assistant*: Your Wordpress gives you SEO adivce as you type your article
+ - *Keyword research and SEO Analysis*: find the keywords that are easier to rank for
+ - *SEO Live Assistant*: Your WordPress gives you SEO advice as you type or Edit your article
  - *Inspiration box*: get images you can use for free, tweets you can quote and get up to date with latest news about your subject
  - *SEO Rank*: Measure and Monitor the impact of SEO and Social Signals for each of your articles
 
 = Where can I enter the title and page description? =
-If you click the Squirrly tab in your dashboard, go to the "First Page Optimization" section and switch to Custom. You can enter custom Title, Description and Keywords.
-If you are an advanced user then in each post/page edit you can customize the title and description from snippet section
+If you click the Squirrly tab in your dashboard, go to the "First Page Optimization" section and switch the Title and Description option on. You can enter custom Title, Description and Keywords.
+
+= Is this Wordpress SEO plugin the only SEO plugin I will need to install? =
+It all depends on how you have setup your Wordpress until now. Some people use Squirrly seo plugin only for the Content Optimization with the Live Assistant part, some use use it to check their SEO stats and see where they need to improve their Wordpress seo, but most of our users and customer use Squirrly for everything related to SEO: from keyword analysis, to seo settings on Wordpress, to analytics and to weekly monitoring and audit reports.

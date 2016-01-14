@@ -11,18 +11,18 @@ class SQ_Tools extends SQ_FrontController {
     public static $options = array();
 
     /** @var integer Count the errors in site */
-    static $errors_count = 0;
+    static $errors_count;
 
     /** @var array */
     private static $debug;
+    private static $source_code;
 
-    function __construct() {
+    public function __construct() {
         parent::__construct();
 
         self::$options = $this->getOptions();
 
-        //$this->checkDebug(); //Check for debug
-        $this->checkWs();
+        $this->checkDebug(); //dev mode
     }
 
     public static function getUserID() {
@@ -31,33 +31,11 @@ class SQ_Tools extends SQ_FrontController {
     }
 
     /**
-     * Check if ws is called
-     */
-    private function checkWs() {
-        if (!self::$options['sq_ws'])
-            return;
-
-        //if debug is called
-        if (self::getIsset('sq_ws'))
-            if (self::getValue('sq_ws') == self::$options['sq_api']) {
-                $ws = SQ_ObjController::getController('SQ_Wservice', false);
-                if (is_object($ws)) {
-                    $info = $ws->getInfo();
-                    if (is_array($info)) {
-                        echo json_encode($info);
-                        exit();
-                    }
-                }
-            }
-    }
-
-    /**
      * This hook will save the current version in database
      *
      * @return void
      */
     function hookInit() {
-
         //TinyMCE editor required
         //set_user_setting('editor', 'tinymce');
 
@@ -75,11 +53,9 @@ class SQ_Tools extends SQ_FrontController {
      * @return array
      */
     public function hookActionlink($links, $file) {
-        if ($file == _PLUGIN_NAME_ . '/squirrly.php') {
-            if (SQ_Tools::$options['sq_howto'] == 1) {
-                $link = '<a href="' . admin_url('admin.php?page=sq_howto') . '">' . __('Getting started', _PLUGIN_NAME_) . '</a>';
-                array_unshift($links, $link);
-            }
+        if ($file == _SQ_PLUGIN_NAME_ . '/squirrly.php') {
+            $link = '<a href="' . admin_url('admin.php?page=sq_dashboard') . '">' . __('Getting started', _SQ_PLUGIN_NAME_) . '</a>';
+            array_unshift($links, $link);
         }
 
         return $links;
@@ -92,18 +68,74 @@ class SQ_Tools extends SQ_FrontController {
      */
     public static function getOptions() {
         $default = array(
-            'sq_beginner_user' => 1,
+            'sq_ver' => 0,
             'sq_api' => '',
+            'sq_checkedissues' => 0,
+            'sq_areissues' => 0,
             'sq_use' => 0,
-            'sq_howto' => 1,
+            'sq_post_types' => array(
+                'post', 'page', 'product', 'shopp_page_shopp-products'
+            ),
             // --
             'sq_auto_canonical' => 1,
-            'sq_auto_sitemap' => 1,
+            'sq_auto_sitemap' => 0,
+            'sq_auto_jsonld' => 0,
+            'sq_jsonld_type' => 'Organization',
+            'sq_jsonld' => array(
+                'Organization' => array(
+                    'name' => '',
+                    'logo' => '',
+                    'telephone' => '',
+                    'contactType' => '',
+                    'description' => ''
+                ),
+                'Person' => array(
+                    'name' => '',
+                    'logo' => '',
+                    'telephone' => '',
+                    'jobTitle' => '',
+                    'description' => ''
+                )),
+            'sq_sitemap_ping' => 1,
+            'sq_sitemap_show' => array(
+                'images' => 1,
+                'videos' => 0,
+            ),
+            'sq_sitemap_frequency' => 'weekly',
+            'sq_sitemap' => array(
+                'sitemap' => array('sitemap.xml', 1),
+                'sitemap-home' => array('sitemap-home.xml', 1),
+                'sitemap-news' => array('sitemap-news.xml', 0),
+                'sitemap-product' => array('sitemap-product.xml', 1),
+                'sitemap-post' => array('sitemap-posts.xml', 1),
+                'sitemap-page' => array('sitemap-pages.xml', 1),
+                'sitemap-category' => array('sitemap-categories.xml', 1),
+                'sitemap-post_tag' => array('sitemap-tags.xml', 1),
+                'sitemap-archive' => array('sitemap-archives.xml', 1),
+                'sitemap-author' => array('sitemap-authors.xml', 0),
+                'sitemap-custom-tax' => array('sitemap-custom-taxonomies.xml', 0),
+                'sitemap-custom-post' => array('sitemap-custom-posts.xml', 0),
+            ),
+            'sq_auto_robots' => 1,
+            'sq_robots_permission' => array(
+                'User-agent: *',
+                'Disallow: */trackback/',
+                'Disallow: */xmlrpc.php',
+                'Disallow: /wp-*.php',
+                'Disallow: /cgi-bin/',
+                'Disallow: /wp-admin/',
+                'Allow: */wp-content/uploads/',),
             'sq_auto_meta' => 1,
-            'sq_auto_favicon' => 1,
-            'sq_auto_twitter' => 1,
-            'sq_auto_facebook' => 1,
+            'sq_auto_favicon' => 0,
+            'favicon' => '',
+            'sq_auto_twitter' => 0,
+            'sq_auto_twittersize' => 'summary',
+            'sq_auto_facebook' => 0,
+            'sq_og_locale' => 'en_US',
             'sq_twitter_account' => '',
+            'sq_facebook_account' => '',
+            'sq_google_plus' => '',
+            'sq_linkedin_account' => '',
             // --
             'sq_auto_seo' => 1,
             'sq_auto_title' => 1,
@@ -112,20 +144,31 @@ class SQ_Tools extends SQ_FrontController {
             'sq_fp_description' => '',
             'sq_fp_keywords' => '',
             // --
-            'sq_google_plus' => '',
             'sq_google_wt' => '',
             'sq_google_analytics' => '',
             'sq_facebook_insights' => '',
             'sq_bing_wt' => '',
+            'sq_pinterest' => '',
             'sq_alexa' => '',
             // --
+            'active_help' => '',
             'ignore_warn' => 0,
             'sq_keyword_help' => 1,
             'sq_keyword_information' => 0,
+            'sq_url_fix' => 1,
+            //
+            'sq_google_country' => 'com',
+            'sq_google_language' => 'en',
+            'sq_google_country_strict' => 0,
+            'sq_google_ranksperhour' => 5,
             // --
-            'sq_advance_user' => 0,
             'sq_affiliate_link' => '',
-            'sq_ws' => 1,
+            'sq_sla' => 1,
+            'sq_keywordtag' => 1,
+            'sq_local_images' => 1,
+            //--
+            'sq_dashboard' => 0,
+            'sq_analytics' => 0,
         );
         $options = json_decode(get_option(SQ_OPTION), true);
 
@@ -137,13 +180,56 @@ class SQ_Tools extends SQ_FrontController {
         return $default;
     }
 
+    public static function getBriefOptions() {
+        if ($pageId = get_option('page_on_front')) {
+            $title = SQ_ObjController::getModel('SQ_Frontend')->getAdvancedMeta($pageId, 'title');
+            $description = SQ_ObjController::getModel('SQ_Frontend')->getAdvancedMeta($pageId, 'description');
+        } else {
+            $title = SQ_Tools::$options['sq_fp_title'];
+            $description = SQ_Tools::$options['sq_fp_description'];
+        }
+        return array(
+            'sq_version' => SQ_VERSION_ID,
+            'sq_use' => SQ_Tools::$options['sq_use'],
+            'sq_checkedissues' => SQ_Tools::$options['sq_checkedissues'],
+            'sq_areissues' => SQ_Tools::$options['sq_areissues'],
+            'sq_auto_canonical' => SQ_Tools::$options['sq_auto_canonical'],
+            'sq_auto_meta' => SQ_Tools::$options['sq_auto_meta'],
+            'sq_auto_sitemap' => SQ_Tools::$options['sq_auto_sitemap'],
+            'sq_auto_jsonld' => (SQ_Tools::$options['sq_auto_jsonld'] && (SQ_Tools::$options['sq_jsonld']['Organization']['name'] <> '' || SQ_Tools::$options['sq_jsonld']['Person']['name'] <> '')),
+            'sq_sitemap_ping' => SQ_Tools::$options['sq_sitemap_ping'],
+            'sq_auto_robots' => SQ_Tools::$options['sq_auto_robots'],
+            'sq_auto_favicon' => (SQ_Tools::$options['sq_auto_favicon'] && SQ_Tools::$options['favicon'] <> ''),
+            'sq_auto_twitter' => SQ_Tools::$options['sq_auto_twitter'],
+            'sq_auto_facebook' => SQ_Tools::$options['sq_auto_facebook'],
+            'sq_auto_seo' => SQ_Tools::$options['sq_auto_seo'],
+            'sq_auto_title' => (int) (SQ_Tools::$options['sq_auto_title'] == 1 && $title <> ''),
+            'sq_auto_description' => (int) (SQ_Tools::$options['sq_auto_description'] == 1 && $description <> ''),
+            'sq_google_plus' => (int) (SQ_Tools::$options['sq_google_plus'] <> ''),
+            'sq_google_wt' => (int) (SQ_Tools::$options['sq_google_wt'] <> ''),
+            'sq_google_analytics' => (int) (SQ_Tools::$options['sq_google_analytics'] <> ''),
+            'sq_facebook_insights' => (int) (SQ_Tools::$options['sq_facebook_insights'] <> ''),
+            'sq_bing_wt' => (int) (SQ_Tools::$options['sq_bing_wt'] <> ''),
+            'sq_pinterest' => (int) (SQ_Tools::$options['sq_pinterest'] <> ''),
+            'sq_alexa' => (int) (SQ_Tools::$options['sq_alexa'] <> ''),
+            'sq_keyword_help' => SQ_Tools::$options['sq_keyword_help'],
+            'sq_keyword_information' => SQ_Tools::$options['sq_keyword_information'],
+            'sq_google_country_strict' => SQ_Tools::$options['sq_google_country_strict'],
+            'sq_keywordtag' => SQ_Tools::$options['sq_keywordtag'],
+            'sq_local_images' => SQ_Tools::$options['sq_local_images'],
+        );
+    }
+
     /**
      * Save the Options in user option table in DB
      *
      * @return void
      */
-    public static function saveOptions($key, $value) {
-        self::$options[$key] = $value;
+    public static function saveOptions($key = null, $value = '') {
+        if (isset($key)) {
+            self::$options[$key] = $value;
+        }
+
         update_option(SQ_OPTION, json_encode(self::$options));
     }
 
@@ -158,6 +244,16 @@ class SQ_Tools extends SQ_FrontController {
         switch ($type) {
             case 'json':
                 header('Content-Type: application/json');
+                break;
+            case 'ico':
+                header('Content-Type: image/x-icon');
+                break;
+            case 'png':
+                header('Content-Type: image/png');
+                break;
+            case'text':
+                header("Content-type: text/plain");
+                break;
         }
     }
 
@@ -169,13 +265,15 @@ class SQ_Tools extends SQ_FrontController {
      * @param mixed $defaultValue (optional)
      * @return mixed Value
      */
-    public static function getValue($key, $defaultValue = false) {
-        if (!isset($key) OR empty($key) OR !is_string($key))
+    public static function getValue($key, $defaultValue = false, $withcode = false) {
+        if (!isset($key) OR empty($key) OR ! is_string($key))
             return false;
-        $ret = (isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : $defaultValue));
+        $ret = (isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? (is_string($_GET[$key]) ? urldecode($_GET[$key]) : $_GET[$key]) : $defaultValue));
 
-        if (is_string($ret) === true)
-            $ret = urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($ret)));
+        if (is_string($ret) === true && $withcode === false) {
+            $ret = sanitize_text_field($ret);
+        }
+
         return !is_string($ret) ? $ret : stripslashes($ret);
     }
 
@@ -186,7 +284,7 @@ class SQ_Tools extends SQ_FrontController {
      * @return boolean
      */
     public static function getIsset($key) {
-        if (!isset($key) OR empty($key) OR !is_string($key))
+        if (!isset($key) OR empty($key) OR ! is_string($key))
             return false;
         return isset($_POST[$key]) ? true : (isset($_GET[$key]) ? true : false);
     }
@@ -212,50 +310,57 @@ class SQ_Tools extends SQ_FrontController {
      */
     private function loadMultilanguage() {
         if (!defined('WP_PLUGIN_DIR')) {
-            load_plugin_textdomain(_PLUGIN_NAME_, _PLUGIN_NAME_ . '/languages/');
+            load_plugin_textdomain(_SQ_PLUGIN_NAME_, _SQ_PLUGIN_NAME_ . '/languages/');
         } else {
-            load_plugin_textdomain(_PLUGIN_NAME_, null, _PLUGIN_NAME_ . '/languages/');
+            load_plugin_textdomain(_SQ_PLUGIN_NAME_, null, _SQ_PLUGIN_NAME_ . '/languages/');
         }
     }
 
     /**
      * Connect remote with CURL if exists
      */
-    public static function sq_remote_get($url, $param = array()) {
-        $cookies = '';
-        $post_preview = false;
+    public static function sq_remote_get($url, $param = array(), $options = array()) {
+        $parameters = '';
         $cookies = array();
         $cookie_string = '';
 
         $url_domain = parse_url($url);
         $url_domain = $url_domain['host'];
 
+        if (isset($param))
+            foreach ($param as $key => $value) {
+                if (isset($key) && $key <> '' && $key <> 'timeout')
+                    $parameters .= ($parameters == "" ? "" : "&") . $key . "=" . $value;
+            }
+        if ($parameters <> '')
+            $url .= ((strpos($url, "?") === false) ? "?" : "&") . $parameters;
 
-        if (isset($param['timeout']))
-            $timeout = $param['timeout'];
-        else
-            $timeout = 30;
-
-        if ($url_domain == $_SERVER['HTTP_HOST'] && strpos($url, 'preview=true') !== false)
-            $post_preview = true;
-
-        if ($post_preview) {
+        //send the cookie for preview
+        if ($url_domain == $_SERVER['HTTP_HOST'] && strpos($url, 'preview=true') !== false) {
             foreach ($_COOKIE as $name => $value) {
-
-                if (strpos($name, 'wordpress') !== false || strpos($name, 'wpta') !== false) {
+                if (strpos($name, 'wordpress') !== false || strpos($name, 'wp') !== false || strpos($name, 'slimstat') !== false || strpos($name, 'sforum') !== false) {
                     $cookies[] = new WP_Http_Cookie(array('name' => $name, 'value' => $value));
                     $cookie_string .= "$name=$value;";
                 }
             }
-            $cookies[] = new WP_Http_Cookie(array('name' => 'sq_snippet', 'value' => 1));
-            $cookie_string .= "sq_snippet=1;";
         }
 
-        if (function_exists('curl_init')) {
-            return self::sq_curl($url, array('timeout' => $timeout, 'cookies' => $cookies, 'cookie_string' => $cookie_string));
-        } else {
-            return self::sq_wpcall($url, array('timeout' => $timeout, 'cookies' => $cookies));
+        $options['timeout'] = (isset($options['timeout'])) ? $options['timeout'] : 30;
+        if (!isset($options['cookie_string'])) {
+            $options['cookies'] = $cookies;
+            $options['cookie_string'] = $cookie_string;
         }
+        $options['sslverify'] = false;
+
+        if (!$response = self::sq_wpcall($url, $options)) {
+            if (function_exists('curl_init') && !ini_get('safe_mode') && !ini_get('open_basedir')) {
+                $response = self::sq_curl($url, $options);
+            } else {
+                return false;
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -264,27 +369,45 @@ class SQ_Tools extends SQ_FrontController {
      * @param array $param
      * @return string
      */
-    private static function sq_curl($url, $param) {
-        $ch = curl_init($url);
+    private static function sq_curl($url, $options) {
+
+        $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, false);
+        //--
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $param['timeout']);
+        //--
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $options['timeout']);
 
-        if ($param['cookie_string'] <> '')
-            curl_setopt($ch, CURLOPT_COOKIE, $param['cookie_string']);
+        if (isset($options['followlocation'])) {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, 1);
+        }
 
+        if ($options['cookie_string'] <> '') {
+            curl_setopt($ch, CURLOPT_COOKIE, $options['cookie_string']);
+        }
+
+        if (isset($options['User-Agent']) && $options['User-Agent'] <> '') {
+            curl_setopt($ch, CURLOPT_USERAGENT, $options['User-Agent']);
+        }
         $response = curl_exec($ch);
         $response = self::cleanResponce($response);
 
-        if (curl_errno($ch) == 1) { //if protocol not supported
-            self::dump(curl_getinfo($ch), curl_errno($ch), curl_error($ch));
-            $response = self::sq_wpcall($url, $param); //use the wordpress call
-        }
-        self::dump('CURL', $url, $param, $response); //output debug
+        self::dump('CURL', $url, $options, $ch, $response); //output debug
 
-        curl_close($ch);
+        if (curl_errno($ch) == 1 || $response === false) { //if protocol not supported
+            if (curl_errno($ch)) {
+                self::dump(curl_getinfo($ch), curl_errno($ch), curl_error($ch));
+            }
+            curl_close($ch);
+            $response = self::sq_wpcall($url, $options); //use the wordpress call
+        } else {
+            curl_close($ch);
+        }
+
         return $response;
     }
 
@@ -294,9 +417,15 @@ class SQ_Tools extends SQ_FrontController {
      * @param array $param
      * @return string
      */
-    private static function sq_wpcall($url, $param) {
-        $response = wp_remote_get($url, $param);
+    private static function sq_wpcall($url, $options) {
+        $response = wp_remote_get($url, $options);
+        if (is_wp_error($response)) {
+            self::dump($response);
+            return false;
+        }
+
         $response = self::cleanResponce(wp_remote_retrieve_body($response)); //clear and get the body
+        self::dump('wp_remote_get', $url, $options, $response); //output debug
         return $response;
     }
 
@@ -305,11 +434,6 @@ class SQ_Tools extends SQ_FrontController {
      */
     public static function sq_remote_head($url) {
         $response = array();
-
-        if (isset($param['timeout']))
-            $timeout = $param['timeout'];
-        else
-            $timeout = 30;
 
         if (function_exists('curl_exec')) {
             $ch = curl_init($url);
@@ -323,7 +447,7 @@ class SQ_Tools extends SQ_FrontController {
 
             return $response;
         } else {
-            return wp_remote_head($url, array('timeout' => $timeout));
+            return wp_remote_head($url, array('timeout' => 30));
         }
 
         return false;
@@ -350,42 +474,80 @@ class SQ_Tools extends SQ_FrontController {
      * Check for SEO blog bad settings
      */
     public static function checkErrorSettings($count_only = false) {
+        if (current_user_can('manage_options')) {
 
+            $fixit = "<a href=\"javascript:void(0);\"  onclick=\"%s jQuery(this).closest('div').fadeOut('slow'); if(parseInt(jQuery('.sq_count').html())>0) { var notif = (parseInt(jQuery('.sq_count').html()) - 1); if (notif > 0) {jQuery('.sq_count').html(notif); }else{ jQuery('.sq_count').html(notif); jQuery('.sq_count').hide(); } } jQuery.post(ajaxurl, { action: '%s', nonce: '" . wp_create_nonce(_SQ_NONCE_ID_) . "'});\" >" . __("Fix it for me!", _SQ_PLUGIN_NAME_) . "</a>";
 
-        if (function_exists('is_network_admin') && is_network_admin())
-            return;
+            /* IF SEO INDEX IS OFF */
+            if (self::getAutoSeoSquirrly()) {
+                self::$errors_count ++;
+                if (!$count_only) {
+                    SQ_Error::setError(__('Activate the Squirrly SEO for your blog (recommended)', _SQ_PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_use_on').trigger('click');", "sq_fixautoseo") . "", 'settings', 'sq_fix_auto');
+                }
+            }
 
-        if (isset(self::$options['ignore_warn']) && self::$options['ignore_warn'] == 1)
-            return;
+            //check only when in seo settings
+            self::$source_code = self::sq_remote_get(get_bloginfo('url'), array(), array('timeout' => 5, 'followlocation' => true));
+            if (self::$source_code <> '') {
+                /* IF TITLE DUPLICATES */
+                if (self::getDuplicateTitle()) {
+                    self::$errors_count ++;
+                    if (!$count_only) {
+                        SQ_Error::setError(__('You have META Title Duplicates. Disable the Squirrly Title Optimization or disable the other SEO Plugins', _SQ_PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_auto_title0').attr('checked', true); jQuery('#sq_automatically').attr('checked', true);", "sq_fix_titleduplicate") . "", 'settings', 'sq_fix_descduplicate');
+                    }
+                }
 
-        $fixit = "<a href=\"javascript:void(0);\"  onclick=\"%s jQuery(this).closest('div').fadeOut('slow'); if(parseInt(jQuery('.sq_count').html())>0) { var notif = (parseInt(jQuery('.sq_count').html()) - 1); if (notif > 0) {jQuery('.sq_count').html(notif); }else{ jQuery('.sq_count').html(notif); jQuery('.sq_count').hide(); } } jQuery.post(ajaxurl, { action: '%s', nonce: '" . wp_create_nonce('sq_none') . "'});\" >" . __("Fix it for me!", _PLUGIN_NAME_) . "</a>";
+                /* IF DESCRIPTION DUPLICATES */
+                if (self::getDuplicateDescription()) {
+                    self::$errors_count ++;
+                    if (!$count_only) {
+                        SQ_Error::setError(__('You have META Description Duplicates. Disable the Squirrly Description Optimization or disable the other SEO Plugins', _SQ_PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_auto_description0').attr('checked', true); jQuery('#sq_automatically').attr('checked', true);", "sq_fix_descduplicate") . "", 'settings', 'sq_fix_descduplicate');
+                    }
+                }
 
-        /* IF SEO INDEX IS OFF */
-//        if ( self::getAutoSeoSquirrly() ){
-//            if ($count_only)
-//                self::$errors_count ++;
-//            else SQ_Error::setError(__('Let Squirrly optimize your SEO automatically (recommended)', _PLUGIN_NAME_) . " <br />" . sprintf( $fixit, "jQuery('#sq_use_on').attr('checked', true); jQuery('#sq_use_on').attr('checked',true);", "sq_fixautoseo") . " | ", 'settings', 'sq_fix_auto');
-//        }
+                /* IF OG DUPLICATES */
+                if (self::getDuplicateOG()) {
+                    self::$errors_count ++;
+                    if (!$count_only) {
+                        SQ_Error::setError(__('You have Open Graph META Duplicates. Disable the Squirrly SEO Open Graph or disable the other SEO Plugins', _SQ_PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_auto_facebook0').attr('checked', true);", "sq_fix_ogduplicate") . "", 'settings', 'sq_fix_ogduplicate');
+                    }
+                }
 
-        /* IF SEO INDEX IS OFF */
-        if (self::getPrivateBlog()) {
+                /* IF TWITTER CARD DUPLICATES */
+                if (self::getDuplicateTC()) {
+                    self::$errors_count ++;
+                    if (!$count_only) {
+                        SQ_Error::setError(__('You have Twitter Card META Duplicates. Disable the Squirrly SEO Twitter Card or disable the other SEO Plugins', _SQ_PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_auto_twitter0').attr('checked', true);", "sq_fix_tcduplicate") . "", 'settings', 'sq_fix_tcduplicate');
+                    }
+                }
+            }
 
-            if ($count_only)
+            /* IF SEO INDEX IS OFF */
+            if (self::getPrivateBlog()) {
                 self::$errors_count++;
-            else
-                SQ_Error::setError(__('You\'re blocking google from indexing your site!', _PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_google_index1').attr('checked',true);", "sq_fixprivate") . " | ", 'settings', 'sq_fix_private');
-        }
+                if (!$count_only) {
+                    SQ_Error::setError(__('You\'re blocking google from indexing your site!', _SQ_PLUGIN_NAME_) . " <br />" . sprintf($fixit, "jQuery('#sq_google_index1').attr('checked',true);", "sq_fixprivate") . "", 'settings', 'sq_fix_private');
+                }
+            }
 
-        if (self::getBadLinkStructure()) {
-            if ($count_only)
+            if (self::getBadLinkStructure()) {
                 self::$errors_count++;
-            else
-                SQ_Error::setError(__('It is highly recommended that you include the %postname% variable in the permalink structure. <br />Go to Settings > Permalinks and add /%postname%/ in Custom Structure', _PLUGIN_NAME_) . " <br /> ", 'settings');
+                if (!$count_only) {
+                    SQ_Error::setError(__('It is highly recommended that you include the %postname% variable in the permalink structure. <br />Go to Settings > Permalinks and add /%postname%/ in Custom Structure', _SQ_PLUGIN_NAME_) . " <br /> ", 'settings');
+                }
+            }
+
+            if (self::$errors_count == 0) {
+                self::saveOptions('sq_areissues', 0);
+                SQ_Error::setError(__('Great! We didn\'t find any issue in your site.', _SQ_PLUGIN_NAME_) . " <br /> ", 'success');
+            } else {
+                self::saveOptions('sq_areissues', 1);
+            }
         }
     }
 
     /**
-     * Check if the blog is in private mode
+     * Check if the automatically seo si active
      * @return bool
      */
     private static function getAutoSeoSquirrly() {
@@ -393,6 +555,102 @@ class SQ_Tools extends SQ_FrontController {
             return ((int) self::$options['sq_use'] == 0 );
 
         return true;
+    }
+
+    /**
+     * Check for META duplicates
+     * @return boolean
+     */
+    private static function getDuplicateOG() {
+        if (!function_exists('preg_match_all')) {
+            return false;
+        }
+
+        if (self::$options['sq_use'] == 1 && self::$options['sq_auto_facebook'] == 1) {
+
+            if (self::$source_code <> '') {
+                preg_match_all("/<meta[\s+]property=[\"|\']og:url[\"|\'][\s+](content|value)=[\"|\']([^>]*)[\"|\'][^>]*>/i", self::$source_code, $out);
+                if (!empty($out) && isset($out[0]) && is_array($out[0])) {
+                    return (sizeof($out[0]) > 1);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check for META duplicates
+     * @return boolean
+     */
+    private static function getDuplicateTC() {
+        if (!function_exists('preg_match_all')) {
+            return false;
+        }
+
+        if (self::$options['sq_use'] == 1 && self::$options['sq_auto_twitter'] == 1) {
+
+            if (self::$source_code <> '') {
+                preg_match_all("/<meta[\s+]name=[\"|\']twitter:card[\"|\'][\s+](content|value)=[\"|\']([^>]*)[\"|\'][^>]*>/i", self::$source_code, $out);
+                if (!empty($out) && isset($out[0]) && is_array($out[0])) {
+                    return (sizeof($out[0]) > 1);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check for META duplicates
+     * @return boolean
+     */
+    private static function getDuplicateDescription() {
+        if (!function_exists('preg_match_all')) {
+            return false;
+        }
+        $total = 0;
+
+        if (self::$options['sq_use'] == 1 && self::$options['sq_auto_description'] == 1) {
+            if (self::$source_code <> '') {
+                preg_match_all("/<meta[^>]*name=[\"|\']description[\"|\'][^>]*content=[\"]([^\"]*)[\"][^>]*>/i", self::$source_code, $out);
+                if (!empty($out) && isset($out[0]) && is_array($out[0])) {
+                    $total += sizeof($out[0]);
+                }
+                preg_match_all("/<meta[^>]*content=[\"]([^\"]*)[\"][^>]*name=[\"|\']description[\"|\'][^>]*>/i", self::$source_code, $out);
+                if (!empty($out) && isset($out[0]) && is_array($out[0])) {
+                    $total += sizeof($out[0]);
+                }
+            }
+        }
+
+        return ($total > 1);
+    }
+
+    /**
+     * Check for META duplicates
+     * @return boolean
+     */
+    private static function getDuplicateTitle() {
+        if (!function_exists('preg_match_all')) {
+            return false;
+        }
+        $total = 0;
+
+        if (self::$options['sq_use'] == 1 && self::$options['sq_auto_title'] == 1) {
+            if (self::$source_code <> '') {
+                preg_match_all("/<title[^>]*>(.*)?<\/title>/i", self::$source_code, $out);
+                if (!empty($out) && isset($out[0]) && is_array($out[0])) {
+                    $total += sizeof($out[0]);
+                }
+                preg_match_all("/<meta[^>]*name=[\"|\']title[\"|\'][^>]*content=[\"|\']([^>\"]*)[\"|\'][^>]*>/i", self::$source_code, $out);
+                if (!empty($out) && isset($out[0]) && is_array($out[0])) {
+                    $total += sizeof($out[0]);
+                }
+            }
+        }
+
+        return ($total > 1);
     }
 
     /**
@@ -459,6 +717,7 @@ class SQ_Tools extends SQ_FrontController {
     }
 
     public static function getBrowserInfo() {
+        $ub = '';
         $u_agent = $_SERVER['HTTP_USER_AGENT'];
         $bname = 'Unknown';
         $platform = 'Unknown';
@@ -530,20 +789,20 @@ class SQ_Tools extends SQ_FrontController {
             'description' => 240,
             'url' => 45);
 
-        $content = self::sq_remote_get($url, array('timeout' => 10));
+        self::$source_code = self::sq_remote_get($url, array(), array('timeout' => 10, 'followlocation' => true));
 
         $title_regex = "/<title[^>]*>([^<>]*)<\/title>/si";
-        preg_match($title_regex, $content, $title);
+        preg_match($title_regex, self::$source_code, $title);
 
         if (is_array($title) && count($title) > 0) {
             $snippet['title'] = $title[1];
             $snippet['title'] = self::i18n(trim(strip_tags($snippet['title'])));
         }
 
-        $description_regex = '/<meta[^<>]*description[^<>]*content="([^"<>]+)"[^<>]*>/si';
-        preg_match($description_regex, $content, $description);
+        $description_regex = '/<meta[^>]*(name|property)=["\']description["\'][^>]*content="([^"<>]+)"[^<>]*>/si';
+        preg_match($description_regex, self::$source_code, $description);
         if (is_array($description) && count($description) > 0) {
-            $snippet['description'] = trim(strip_tags(htmlspecialchars($description[1])));
+            $snippet['description'] = self::i18n(trim(strip_tags($description[2])));
 
             if (strlen($snippet['description']) > $length['description'])
                 $snippet['description'] = substr($snippet['description'], 0, ($length['description'] - 1)) . '...';
@@ -562,18 +821,16 @@ class SQ_Tools extends SQ_FrontController {
     private function checkDebug() {
         //if debug is called
         if (self::getIsset('sq_debug')) {
-
-
-            if (self::getValue('sq_debug') == self::$options['sq_api'])
+            if (self::getValue('sq_debug') == self::$options['sq_api']) {
                 $_GET['sq_debug'] = 'on';
-            elseif (is_admin())
-                $_GET['sq_debug'] = 'on';
-            else
+            } else {
                 $_GET['sq_debug'] = 'off';
+            }
 
             if (self::getValue('sq_debug') === 'on') {
-                if (function_exists('register_shutdown_function'))
+                if (function_exists('register_shutdown_function')) {
                     register_shutdown_function(array($this, 'showDebug'));
+                }
             }
         }
     }
@@ -582,28 +839,31 @@ class SQ_Tools extends SQ_FrontController {
      * Store the debug for a later view
      */
     public static function dump() {
+        if (self::getValue('sq_debug') !== 'on') {
+            return;
+        }
+
         $output = '';
         $callee = array('file' => '', 'line' => '');
         if (function_exists('func_get_args')) {
             $arguments = func_get_args();
             $total_arguments = count($arguments);
-        }
-        else
+        } else
             $arguments = array();
 
 
-
+        $run_time = number_format(microtime(true) - REQUEST_TIME, 3);
         if (function_exists('debug_backtrace'))
             list( $callee ) = debug_backtrace();
 
         $output .= '<fieldset style="background: #FFFFFF; border: 1px #CCCCCC solid; padding: 5px; font-size: 9pt; margin: 0;">';
-        $output .= '<legend style="background: #EEEEEE; padding: 2px; font-size: 8pt;">' . $callee['file'] . ' @ line: ' . $callee['line']
+        $output .= '<legend style="background: #EEEEEE; padding: 2px; font-size: 8pt;">' . $callee['file'] . ' Time: ' . $run_time . ' @ line: ' . $callee['line']
                 . '</legend><pre style="margin: 0; font-size: 8pt; text-align: left;">';
 
         $i = 0;
         foreach ($arguments as $argument) {
             if (count($arguments) > 1)
-                $output .= "\n" . '<strong>#' . (++$i ) . ' of ' . $total_arguments . '</strong>: ';
+                $output .= "\n" . '<strong>#' . ( ++$i ) . ' of ' . $total_arguments . '</strong>: ';
 
             // if argument is boolean, false value does not display, so ...
             if (is_bool($argument))
@@ -625,9 +885,67 @@ class SQ_Tools extends SQ_FrontController {
      * Show the debug dump
      */
     public static function showDebug() {
-        echo "Debug result: <br />" . @implode('<br />', self::$debug);
+        global $wp_query;
+        echo "Debug result: <br />" . '<div id="wpcontent">' . @implode('<br />', self::$debug) . '</div>';
+
+        $run_time = number_format(microtime(true) - REQUEST_TIME, 3);
+        $pps = number_format(1 / $run_time, 0);
+        $memory_avail = ini_get('memory_limit');
+        $memory_used = number_format(memory_get_usage(true) / ( 1024 * 1024 ), 2);
+        $memory_peak = number_format(memory_get_peak_usage(true) / ( 1024 * 1024 ), 2);
+
+        echo PHP_EOL . " Load: {$memory_avail} (avail) / {$memory_used}M (used) / {$memory_peak}M (peak)";
+        echo "  | Time: {$run_time}s | {$pps} req/sec";
+        echo "<pre>" . print_r($wp_query,true).  "</pre>";
+    }
+
+    public function sq_activate() {
+        set_transient('sq_activate', true);
+        set_transient('sq_rewrite', true);
+    }
+
+    public function sq_deactivate() {
+        //clear the cron job
+        wp_clear_scheduled_hook('sq_processCron');
+
+        $args = array();
+        $args['type'] = 'deact';
+        SQ_Action::apiCall('sq/user/log', $args, 5);
+
+        remove_filter('rewrite_rules_array', array(SQ_ObjController::getBlock('SQ_BlockSettingsSeo'), 'rewrite_rules'));
+        global $wp_rewrite;
+        $wp_rewrite->flush_rules();
+    }
+
+    public static function emptyCache($post_id = null) {
+        if (function_exists('w3tc_pgcache_flush')) {
+            w3tc_pgcache_flush();
+        }
+        if (function_exists('wp_cache_clear_cache')) {
+            wp_cache_clear_cache();
+        }
+        if (function_exists('wp_cache_post_edit') && isset($post_id)) {
+            wp_cache_post_edit($post_id);
+        }
+
+        if (class_exists("WpFastestCache")) {
+            $wpfc = new WpFastestCache();
+            $wpfc->deleteCache();
+        }
+    }
+
+    public static function checkUpgrade() {
+        if (self::$options['sq_ver'] == 0 || self::$options['sq_ver'] < SQ_VERSION_ID) {
+            //Delete the old versions table
+            global $wpdb;
+            $wpdb->query("UPDATE " . $wpdb->postmeta . " SET `meta_key` = '_sq_fp_title' WHERE `meta_key` = 'sq_fp_title'");
+            $wpdb->query("UPDATE " . $wpdb->postmeta . " SET `meta_key` = '_sq_fp_description' WHERE `meta_key` = 'sq_fp_description'");
+            $wpdb->query("UPDATE " . $wpdb->postmeta . " SET `meta_key` = '_sq_fp_ogimage' WHERE `meta_key` = 'sq_fp_ogimage'");
+            $wpdb->query("UPDATE " . $wpdb->postmeta . " SET `meta_key` = '_sq_fp_keywords' WHERE `meta_key` = 'sq_fp_keywords'");
+            $wpdb->query("UPDATE " . $wpdb->postmeta . " SET `meta_key` = '_sq_post_keyword' WHERE `meta_key` = 'sq_post_keyword'");
+
+            self::saveOptions('sq_ver', SQ_VERSION_ID);
+        }
     }
 
 }
-
-?>

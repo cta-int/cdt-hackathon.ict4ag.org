@@ -5,209 +5,66 @@
  */
 class SQ_Ranking extends SQ_FrontController {
 
-    private $analytics_table = 'sq_analytics';
-    private $keyword_table = 'sq_keywords';
     private $keyword;
+    private $post_id;
+    private $error;
 
-    function __construct() {
-        parent::__construct();
-        $this->now = current_time('timestamp');
-
-        SQ_ObjController::getController('SQ_Traffic', false);
+    //--
+    public function getCountry() {
+        if (isset(SQ_Tools::$options['sq_google_country']) && SQ_Tools::$options['sq_google_country'] <> '') {
+            return SQ_Tools::$options['sq_google_country'];
+        }
+        return 'com';
     }
 
-    function init() {
-        return;
+    public function getRefererCountry() {
+        $convert_refc = array('com' => 'us', '.off.ai' => 'ai', 'com.ag' => 'ag', 'com.ar' => 'ar', 'com.au' => 'au', 'com.br' => 'br', 'com.co' => 'co', 'co.cr' => 'cr', 'com.cu' => 'cu', 'com.do' => 'do', 'com.ec' => 'ec', 'com.sv' => 'sv', 'com.fj' => 'fj', 'com.gi' => 'gi', 'com.gr' => 'gr', 'com.hk' => 'hk', 'co.hu' => 'hu', 'co.in' => 'in', 'co.im' => 'im', 'co.il' => 'il', 'com.jm' => 'jm', 'co.jp' => 'jp', 'co.je' => 'je', 'co.kr' => 'kr', 'co.ls' => 'ls', 'com.my' => 'my', 'com.mt' => 'mt', 'com.mx' => 'mx', 'com.na' => 'na', 'com.np' => 'np', 'com.ni' => 'ni', 'com.nf' => 'nf', 'com.pk' => 'pk', 'com.pa' => 'pa', 'com.py' => 'py', 'com.pe' => 'pe', 'com.ph' => 'ph', 'com.pr' => 'pr', 'com.sg' => 'sg', 'co.za' => 'za', 'com.tw' => 'tw', 'com.th' => 'th', 'com.tr' => 'tr', 'com.ua' => 'ua', 'com.uk' => 'uk', 'com.uy' => 'uy',);
+        $country = $this->getCountry();
+        if (array_key_exists($country, $convert_refc)) {
+            return $convert_refc[$country];
+        }
+        return $country;
     }
 
-    function action() {
+    /**
+     * Get the google language from settings
+     * @return type
+     */
+    public function getLanguage() {
+        if (isset(SQ_Tools::$options['sq_google_language']) && SQ_Tools::$options['sq_google_language'] <> '') {
+            return SQ_Tools::$options['sq_google_language'];
+        }
+        return 'en';
+    }
 
+    /**
+     * Set the Post id
+     * @return type
+     */
+    public function setPost($post_id) {
+        $this->post_id = $post_id;
+    }
+
+    /**
+     * Get the current keyword
+     * @param type $keyword
+     */
+    public function setKeyword($keyword) {
+        $this->keyword = str_replace(" ", "+", urlencode(strtolower($keyword)));
     }
 
     /**
      * Process Ranking on brief request
      * @param type $return
      */
-    public function processRanking(&$return, $post_id) {
-        if (isset($return->seo) && is_object($return->seo)) {
-            $return->global_rank = $this->findTodayRank($post_id, 'global_rank');
-            $saved_keyword = $this->findTodayRank($post_id, 'keyword');
+    public function processRanking($post_id, $keyword) {
+        $this->setPost($post_id);
+        $this->setKeyword(trim($keyword));
 
-            if ($return->global_rank == -1 || $return->seo->keyword <> $saved_keyword) {
-                //   echo "global_rank: " .$return->global_rank;
-                $return->global_rank = $this->getGoogleRank($post_id, $return->seo->keyword);
-                //Save results
-                $this->saveRank($post_id, $return->global_rank, true);
-            }
-
-            //Local search
-            $country = $this->getLocalGoogleExtension();
-            if ($country <> '') {
-
-                $return->local_rank = $this->findTodayRank($post_id, 'local_rank');
-                if ($return->local_rank == -1 || $return->seo->keyword <> $saved_keyword) {
-                    // echo 'local_rank: '.$return->local_rank;
-                    sleep(1);
-                    $return->local_rank = $this->getGoogleRank($post_id, $return->seo->keyword, $country);
-                    //Save results
-                    $this->saveRank($post_id, $return->local_rank, false);
-                }
-            }
+        if (isset($this->keyword) && $this->keyword <> '') {
+            return $this->getGoogleRank();
         }
-    }
-
-    /**
-     * Process Ranking on brief request
-     * @param type $return
-     */
-    public function checkIndexed(&$return, $post_id) {
-        $return->indexed = $this->findHistoryIndexed($post_id);
-
-        //If is indexed search is a keyword is indexed
-        if ($return->indexed == 1) {
-            $this->processRanking($return, $post_id);
-        }
-
-        if ($return->indexed == -1 || $return->indexed == 0)
-        //Save if indexed in any position
-            if (isset($return->seo))
-                if ($this->getGoogleRank($post_id, $return->seo->permalink) > 0) {
-                    $this->saveIndexed($post_id);
-                    $return->indexed = 1;
-                }
-    }
-
-    /**
-     * Check if other keywords were find with search engines
-     *
-     * @param integer $post_id
-     * @return boolean
-     */
-    public function getOtherKeywords($post_id) {
-        global $wpdb;
-        $other_keywords = array();
-        $sql = "SELECT count(kw.`keyword`) as searched, kw.`keyword`
-                       FROM `" . $this->keyword_table . "` kw
-                       WHERE " . (((int) $post_id > 0) ? "kw.`post_id`=" . (int) $post_id : "kw.`home`=1") . "
-                       GROUP BY kw.`keyword`
-                       ORDER BY searched DESC LIMIT 1";
-
-        $row = $wpdb->get_row($sql);
-
-        if ($row) {
-            $other_keywords = json_decode($this->findTodayRank($post_id, 'other_keywords'), true);
-
-            if (!isset($other_keywords[$row->keyword]['global']) || $other_keywords[$row->keyword]['global'] == 0) {
-                $row->global_rank = $this->getGoogleRank($post_id, $row->keyword);
-                if ($row->global_rank > 0) {
-                    //Save results
-                    $this->saveOtherRank($post_id, $row->global_rank, 'global', $row->keyword);
-                }
-            }
-
-            $country = $this->getLocalGoogleExtension();
-            if ($country <> '') {
-                if (!isset($other_keywords[$row->keyword]['local']) || $other_keywords[$row->keyword]['local'] == 0) {
-                    $row->local_rank = $this->getGoogleRank($post_id, $row->keyword);
-                    if ($row->local_rank > 0) {
-                        //Save results
-                        $this->saveOtherRank($post_id, $row->global_rank, 'local', $row->keyword);
-                    }
-                }
-            }
-
-            return $row;
-        }
-        else
-            return false;
-    }
-
-    /**
-     * Get the keword google  position
-     * @param integer $post_id
-     * @return string
-     */
-    public function getRank($post_id = "") {
-        global $wpdb;
-
-        //Check if ranks is saved in database
-        $sql = "SELECT analytics.`id`,analytics.`indexed`,analytics.`global_rank`,analytics.`local_rank`, analytics.`keyword`,analytics.`other_keywords`,analytics.`date`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`post_id`=" . (int) $post_id . " AND analytics.`date`='" . date('Y-m-d', $this->now) . "'";
-        $row = $wpdb->get_row($sql);
-
-        $sql = "SELECT analytics.`id`,analytics.`indexed`,analytics.`global_rank`,analytics.`local_rank`, analytics.`keyword`,analytics.`other_keywords`,analytics.`date`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`post_id`=" . (int) $post_id . " AND (analytics.`global_rank` > 0  OR analytics.`local_rank` > 0) AND analytics.`date`<'" . date('Y-m-d', $this->now) . "'
-                ORDER BY analytics.`date` DESC LIMIT 1";
-        $last_row = $wpdb->get_row($sql);
-
-        if ($last_row && $row && $last_row->keyword == $row->keyword) {
-            $serp['change'] = array('global' => (($last_row->global_rank > 0 && $row->global_rank > 0) ? ($last_row->global_rank - $row->global_rank) : ($row->global_rank > 0 ? 'new' : 0)), 'local' => (($last_row->local_rank > 0 && $row->local_rank > 0) ? ($last_row->local_rank - $row->local_rank) : ($row->local_rank > 0 ? 'new' : 0)));
-            $serp['change']['lastcheck'] = $last_row->date;
-        } else {
-            $serp['change'] = array('global' => 0, 'local' => 0);
-        }
-
-
-        if ($row) {
-            $serp['position'] = array('global' => $row->global_rank, 'local' => $row->local_rank);
-            $serp['others'] = json_decode($row->other_keywords, true);
-        } elseif ($last_row) {
-            $serp['position'] = array('global' => $last_row->global_rank, 'local' => $last_row->local_rank);
-            $serp['others'] = json_decode($last_row->other_keywords, true);
-        }
-
-        $serp['keyword'] = $row->keyword;
-        $country = $this->getLocalGoogleExtension();
-        $serp['flag'] = array('global' => 'com', 'local' => $country, 'local_ico' => $this->getLocalLanguage());
-
-        return $serp;
-    }
-
-    /**
-     * Check if there are records for today
-     * @param integer $post_id
-     * @param integer $rank - the default rank position
-     * @return integer
-     */
-    private function findTodayRank($post_id, $rank) {
-        global $wpdb;
-        //Check if ranks is saved in database
-        $sql = "SELECT analytics.`id`,analytics.`indexed`,analytics.`global_rank`,analytics.`local_rank`,analytics.`keyword`,analytics.`other_keywords`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`post_id`=" . (int) $post_id . " AND DATE(analytics.`date`)='" . date('Y-m-d', $this->now) . "'";
-        $row = $wpdb->get_row($sql);
-
-        //If rank is already saved for today then return r=tha value
-        if ($row) {
-            return $row->$rank;
-        }
-        else
-            return -1;
-    }
-
-    /**
-     * Check the rank in history
-     *
-     * @param integer $post_id
-     * @return int
-     */
-    private function findHistoryIndexed($post_id) {
-        global $wpdb;
-        //Check if ranks is saved in database
-        $sql = "SELECT analytics.`indexed`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`indexed` = 1 AND analytics.`post_id`=" . (int) $post_id . " AND DATE(analytics.`date`) < '" . date('Y-m-d', $this->now) . "'
-                LIMIT 1";
-        //echo $sql;
-        $row = $wpdb->get_row($sql);
-
-        //If rank is already saved for today then return r=tha value
-        if ($row)
-            return 1;
-        else
-            return $this->findTodayRank($post_id, 'indexed');
+        return false;
     }
 
     /**
@@ -219,205 +76,229 @@ class SQ_Ranking extends SQ_FrontController {
      * @param string $language: en | local language
      * @return boolean|int
      */
-    function getGoogleRank($post_id = 0, $keyword = "", $country = "com", $language = "en") {
+    public function getGoogleRank() {
         global $wpdb;
-        $this->keyword = $keyword;
+        $this->error = '';
 
-        $keyword = str_replace(" ", "+", urlencode(strtolower($keyword)));
-        if (!function_exists('preg_match_all'))
-            return;
-
-        //Search google for rank
-        $url = "http://www.google.$country/search?q=$keyword&amp;hl=$language&amp;ie=utf-8&as_qdr=all&amp;aq=t&amp;rls=org:mozilla:us:official&amp;client=firefox&num=100&filter=0&nfpr=1";
-
-        //Grab the remote informations from google
-        $response = SQ_Tools::sq_remote_get($url, array('timeout' => 10));
-        $response = utf8_decode($response);
-
-        //echo ;
-        //Check the values for block IP
-        if (strpos($response, "computer virus or spyware application") !== false ||
-                strpos($response, "entire network is affected") !== false ||
-                strpos($response, "http://www.download.com/Antivirus") !== false ||
-                strpos($response, "/images/yellow_warning.gif") !== false) {
-            return -1;
+        if (trim($this->keyword) == '') {
+            $this->error = 'no keyword for post_id:' . $this->post_id;
             return false;
         }
 
+        if (!function_exists('preg_match_all')) {
+            return false;
+        }
+
+        $arg = array('timeout' => 10);
+        $arg['as_q'] = str_replace(" ", "+", strtolower(trim($this->keyword)));
+        $arg['hl'] = $this->getLanguage();
+        //$arg['gl'] = $this->getRefererCountry();
+
+        if (SQ_Tools::$options['sq_google_country_strict'] == 1) {
+            $arg['cr'] = 'country' . strtoupper($this->getRefererCountry());
+        }
+        $arg['start'] = '0';
+        $arg['num'] = '100';
+
+        $arg['safe'] = 'active';
+        $arg['pws'] = '0';
+        $arg['as_epq'] = '';
+        $arg['as_oq'] = '';
+        $arg['as_nlo'] = '';
+        $arg['as_nhi'] = '';
+        $arg['as_qdr'] = 'all';
+        $arg['as_sitesearch'] = '';
+        $arg['as_occt'] = 'any';
+        $arg['tbs'] = '';
+        $arg['as_filetype'] = '';
+        $arg['as_rights'] = '';
+
+        $country = $this->getCountry();
+
+        if ($country == '' || $arg['hl'] == '') {
+            $this->error = 'no country (' . $country . ')';
+            return false;
+        }
+
+        $user_agents = array(
+            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/600.6.3 (KHTML, like Gecko) Version/8.0.6 Safari/600.6.3',
+            'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/600.7.12 (KHTML, like Gecko) Version/8.0.7 Safari/600.7.12',
+            'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:38.0) Gecko/20100101 Firefox/38.0',
+            'Mozilla/5.0 (iPad; CPU OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko ) Version/5.1 Mobile/9B176 Safari/7534.48.3',
+            'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
+            'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_7; da-dk) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
+            'Mozilla/5.0 (Windows; U; Windows NT 6.1; tr-TR) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
+            'Mozilla/5.0 (Windows; U; Windows NT 6.1; fr-FR) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
+            'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
+            'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_6; en-us) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27',
+            'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.3 Safari/533.19.4',
+            'Opera/9.80 (X11; Linux i686; Ubuntu/14.10) Presto/2.12.388 Version/12.16',
+            'Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14',
+            'Mozilla/5.0 (Windows NT 6.0; rv:2.0) Gecko/20100101 Firefox/4.0 Opera 12.14',
+            'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0) Opera 12.14',
+            'Opera/12.80 (Windows NT 5.1; U; en) Presto/2.10.289 Version/12.02',
+            'Opera/9.80 (Windows NT 6.1; U; es-ES) Presto/2.9.181 Version/12.00',
+            'Opera/12.0(Windows NT 5.1;U;en)Presto/22.9.168 Version/12.00',
+            'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:38.0) Gecko/20100101 Firefox/38.0',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko',
+            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:38.0) Gecko/20100101 Firefox/38.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0',
+            'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+        );
+
+        $option = array();
+        $option['User-Agent'] = $user_agents[mt_rand(0, count($user_agents) - 1)];
+        $option['followlocation'] = true;
+        //Grab the remote informations from google
+        $response = utf8_decode(SQ_Tools::sq_remote_get("https://www.google.$country/search", $arg, $option));
+
+        //Check the values for block IP
+        if (strpos($response, "</h3>") === false) {
+            set_transient('google_blocked', 1, (60 * 60 * 1));
+            return -2; //return error
+        }
+
         //Get the permalink of the current post
-        $permalink = get_permalink($post_id);
-        //$permalink = 'sq.cifnet.ro';
-        //$response = @preg_replace('/<ol[^>]*>(.*?)<\/ol>/', '', $response);
-        //echo $response;
-        @preg_match_all('/<li[^>]*>[^h3]*<h3 class="r">(.*?)<\/h3>/', $response, $matches);
-        //print_R($matches);
-        if (is_array($matches[0]))
-            foreach ($matches[0] as $key => $match) {
-                if (strpos($match, $permalink) !== false) {
-                    $pos = $key + 1;
-                    return $pos;
+        $permalink = get_permalink($this->post_id);
+        if ($permalink == '') {
+            $this->error = 'no permalink for post_id:' . $this->post_id;
+            return false;
+        }
+
+        preg_match_all('/<h3.*?><a href="(.*?)".*?<\/h3>/is', $response, $matches);
+
+        SQ_Tools::dump($matches[1]);
+        if (!empty($matches[1])) {
+            $pos = -1;
+            foreach ($matches[1] as $index => $url) {
+                if (strpos($url, rtrim($permalink, '/')) !== false) {
+                    $pos = $index + 1;
                     break;
                 }
             }
-
-        return 0;
+            return $pos;
+        }
+        $this->error = 'no results returned by google';
+        return false;
     }
 
     /**
-     * Save the rank in database
-     *
-     * @param integer $post_id
-     * @param integer $pos
-     * @param boolean $global
-     * @return query
+     * Do google rank with cron
+     * @global type $wpdb
      */
-    function saveRank($post_id, $pos = 0, $global = true) {
+    public function processCron() {
         global $wpdb;
-        $home = ($post_id == 0 ? 1 : 0);
-
-
-        $sql = "SELECT analytics.`id`, analytics.`local_rank`, analytics.`global_rank`, analytics.`keyword`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`post_id`=" . (int) $post_id . " AND analytics.`date`='" . date('Y-m-d', $this->now) . "'";
-        $row = $wpdb->get_row($sql);
-
-        if ($row) {
-            $global_rank = ($global ? $pos : $row->global_rank);
-            $local_rank = (!$global ? $pos : $row->local_rank);
-            $sql = "UPDATE `" . $this->analytics_table . "` analytics
-                       SET analytics.`local_rank`='" . (int) $local_rank . "',
-                           analytics.`global_rank`='" . (int) $global_rank . "',
-                           analytics.`keyword`='" . (($this->keyword <> '') ? $this->keyword : $row->keyword) . "'
-                       WHERE analytics.`id`=" . (int) $row->id;
-        } else {
-            $global_rank = ($global ? $pos : -1);
-            $local_rank = (!$global ? $pos : -1);
-
-            $sql = "INSERT INTO `" . $this->analytics_table . "`
-                    (`count`,`unique`,`post_id`,`home`,`global_rank`,`local_rank`,`keyword`,`date`)
-                    VALUES (0,0," . $post_id . "," . $home . "," . $global_rank . "," . $local_rank . ",'" . $this->keyword . "','" . date("Y-m-d") . "')";
+        if (get_transient('google_blocked') !== false) {
+            return;
         }
-        return $wpdb->query($sql);
+        set_time_limit(3000);
+        /* Load the Submit Actions Handler */
+        SQ_ObjController::getController('SQ_Tools', false);
+        SQ_ObjController::getController('SQ_Action', false);
+
+        //check 20 keyword at one time
+        $sql = "SELECT `post_id`, `meta_value`
+                       FROM `" . $wpdb->postmeta . "`
+                       WHERE (`meta_key` = '_sq_post_keyword')
+                       ORDER BY `post_id` DESC";
+
+        if ($rows = $wpdb->get_results($sql)) {
+            $count = 0;
+            foreach ($rows as $row) {
+                if ($count > SQ_Tools::$options['sq_google_ranksperhour']) {
+                    break; //check only 10 keywords at the time
+                }
+                if ($row->meta_value <> '') {
+                    $json = json_decode($row->meta_value);
+                    //If keyword is set and no rank or last check is 2 days ago
+                    if (isset($json->keyword) && $json->keyword <> '' &&
+                            (!isset($json->rank) ||
+                            (isset($json->update) && (time() - $json->update > (60 * 60 * 24 * 2))) || //if indexed then check every 2 days
+                            (isset($json->update) && isset($json->rank) && $json->rank == -1 && (time() - $json->update > (60 * 60 * 24))) //if not indexed than check often
+                            )) {
+
+                        $rank = $this->processRanking($row->post_id, $json->keyword);
+                        if ($rank == -1) {
+                            $count++;
+                            sleep(mt_rand(20, 40));
+                            //if not indexed with the keyword then find the url
+                            if ($this->processRanking($row->post_id, get_permalink($row->post_id)) > 0) {
+                                $rank = 0; //for permalink index set 0
+                            }
+                        }
+
+                        //if there is a success response than save it
+                        if (isset($rank) && $rank >= -1) {
+                            $json->rank = $rank;
+                            $json->country = $this->getCountry();
+                            $json->language = $this->getLanguage();
+                            SQ_ObjController::getModel('SQ_Post')->saveKeyword($row->post_id, $json);
+                        }
+                        set_transient('sq_rank' . $row->post_id, $rank, (60 * 60 * 24));
+                        //if rank proccess has no error
+
+                        $args = array();
+                        $args['post_id'] = $row->post_id;
+                        $args['rank'] = (string) $rank;
+                        $args['error'] = $this->error;
+                        $args['country'] = $this->getCountry();
+                        $args['language'] = $this->getLanguage();
+
+                        SQ_Action::apiCall('sq/user-analytics/saveserp', $args);
+
+                        $count++;
+                        sleep(mt_rand(20, 40));
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Save the rank for other keywords
+     * Get keyword from earlier version
      *
-     * @param integer $post_id
-     * @param integer $pos
-     * @param string $where
-     * @param string $keyword
-     * @return query
      */
-    function saveOtherRank($post_id, $pos = 0, $where = 'global', $keyword = '') {
+    public function getKeywordHistory() {
         global $wpdb;
-        $home = ($post_id == 0 ? 1 : 0);
-        $other_keywords = array();
+        //Check if ranks is saved in database
+        $sql = "SELECT a.`global_rank`, a.`keyword`, a.`post_id`
+                FROM `sq_analytics` as a
+                INNER JOIN (SELECT MAX(`id`) as id FROM `sq_analytics` WHERE `keyword` <> '' GROUP BY `post_id`) as a1 ON a1.id = a.id ";
 
-        $sql = "SELECT analytics.`id`, analytics.`other_keywords`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`post_id`=" . (int) $post_id . " AND analytics.`date`='" . date('Y-m-d', $this->now) . "'";
-        $row = $wpdb->get_row($sql);
-
-        if ($row) {
-            $other_keywords = json_decode($row->other_keywords, true);
-            $other_keywords[$keyword][$where] = $pos;
-
-            $sql = "UPDATE `" . $this->analytics_table . "` analytics
-                       SET analytics.`other_keywords`='" . json_encode($other_keywords) . "'
-                       WHERE analytics.`id`=" . (int) $row->id;
-        } else {
-            $sql = "INSERT INTO `" . $this->analytics_table . "`
-                    (`count`,`unique`,`post_id`,`home`,`other_keywords`,`date`)
-                    VALUES (0,0," . $post_id . "," . $home . ",'" . json_encode($other_keywords) . "','" . date("Y-m-d") . "')";
+        if ($rows = $wpdb->get_results($sql)) {
+            foreach ($rows as $values) {
+                if ($json = SQ_ObjController::getModel('SQ_Post')->getKeyword($values->post_id)) {
+                    $json->keyword = urldecode($values->keyword);
+                    if ($values->global_rank > 0) {
+                        $json->rank = $values->global_rank;
+                    }
+                    SQ_ObjController::getModel('SQ_Post')->saveKeyword($values->post_id, $json);
+                } else {
+                    $args = array();
+                    $args['keyword'] = urldecode($values->keyword);
+                    if ($values->global_rank > 0) {
+                        $json->rank = $values->global_rank;
+                    }
+                    SQ_ObjController::getModel('SQ_Post')->saveKeyword($values->post_id, json_decode(json_encode($args)));
+                }
+            }
         }
-        return $wpdb->query($sql);
-    }
-
-    /**
-     * Save google indexed status in database
-     *
-     * @param integer $post_id
-     * @return query
-     */
-    function saveIndexed($post_id) {
-        global $wpdb;
-
-        $sql = "SELECT analytics.`id`, analytics.`indexed`
-                FROM `" . $this->analytics_table . "` analytics
-                WHERE analytics.`post_id`=" . (int) $post_id . " AND DATE(analytics.`date`)='" . date('Y-m-d', $this->now) . "'";
-        $row = $wpdb->get_row($sql);
-
-        if ($row) {
-            $sql = "UPDATE `" . $this->analytics_table . "` analytics
-                    SET analytics.`indexed`='1'
-                    WHERE analytics.`id`=" . (int) $row->id;
-        } else {
-            $sql = "INSERT INTO `" . $this->analytics_table . "`
-                    (`post_id`,`indexed`,`date`)
-                    VALUES (" . (int) $post_id . ",1,'" . date("Y-m-d") . "')";
-        }
-
-        return $wpdb->query($sql);
-    }
-
-    /**
-     * Return the local google extension from language
-     * @return string
-     */
-    function getLocalGoogleExtension() {
-        return $this->getGoogleExtension($this->getLocalLanguage());
-    }
-
-    /**
-     * Get the local language
-     * @return string
-     */
-    private function getLocalLanguage() {
-        $language = WPLANG;
-        if (strpos($language, '_') !== false)
-            $language = substr($language, 0, strpos($language, '_'));
-        else
-            $language = ($language == '' ? 'en' : $language);
-
-        return $language;
-    }
-
-    /**
-     * Check the google extension according to language
-     * @param string $language
-     * @return string
-     */
-    function getGoogleExtension($language) {
-        switch ($language) {
-            case 'en':
-                $country = '';
-                break;
-            case 'ca':
-                $country = 'ca';
-                $language = 'en';
-                break;
-            case 'au':
-            case 'ar':
-            case 'br':
-            case 'co':
-            case 'gr':
-            case 'pk':
-            case 'tr':
-            case 'tw':
-                $country = 'com.' . $language;
-                break;
-            case 'jp':
-            case 'uk':
-            case 'kr':
-                $country = 'co.' . $language;
-                break;
-            default:
-                $country = $language;
-        }
-        return $country;
     }
 
 }
-
-?>
