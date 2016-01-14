@@ -29,14 +29,14 @@ require(__DIR__ . '/wp-local-config.php');
  *
  * @since 2.6.0
  */
-define('AUTH_KEY',         'kT%*LpbY5#Jc!5Z()_iUtU*Q+/GKanX`vPy9!LUW|H+^np;O9xD$BNIELDw!3cy5');
-define('SECURE_AUTH_KEY',  'u&/%ZPBlMAl%uV4Y@J*FTmL2T(Lcw1fG^&|$"OdrD%Rf;XhgG`yjFnKlS%9EFz?#');
-define('LOGGED_IN_KEY',    'Ws5sE9NI@"mhN"I"WL;^k%V@xAssdT_KdRRTC@Yt)mlvO@08"6m8&h$%F2Yz?_IJ');
-define('NONCE_KEY',        '2W1D;Ege3@0jscz/%X19|C^nkm7I|5yuOhXtZPd8JqzQS*ZrR_Q$;I!8IH$~ffN2');
-define('AUTH_SALT',        'YwheT6H#BAZY!e~Mf/jL;bvk/tw9G%/vz$Gah(~+h|oicTAI&%J^vBJZ$)obitND');
-define('SECURE_AUTH_SALT', 'b*$n!%ha@_rWBEu*YQ~4k:1"7VB(~`oMZndj)qH|X"OoOwCTnUY`yz9c%8biV!Kb');
-define('LOGGED_IN_SALT',   'D4@9K$U:?VX:j7f7/)S!hs$z|jH2x66INX?u5ANj6%&0UnP1fxN5g"hA9U513@S_');
-define('NONCE_SALT',       'MPdcxvMQ?2RYA0SmA*bQXjlAVy*nAqP+hz~Z;ls48AHRcyK9k"T|z)QFf&/@3Vw!');
+define('AUTH_KEY',         'LU&JM@&eVnzM5Xnr:8XSOxACub`8ag~fz^HXtpl;5)%zLzJx3v`gFk!7*hgd&3Pg');
+define('SECURE_AUTH_KEY',  '"c~eV~ufvfmYmZg~b:a?t|i98$42C^KHv|1yjd#@aaFWO^K"O8$CH*j$20Jy8iFF');
+define('LOGGED_IN_KEY',    '(+F+~V;r%UH?$(pc+XgDV#%OZlUUF+caNgh0uPW1#J!JXjG|:A3S50#s5yT|Im~3');
+define('NONCE_KEY',        '#Bqj"?*c@S6CL~@%8uDvwBQld"Sg3J_YJ;N2#VN*?QtnDfRbz$0vex3?jABx+o$/');
+define('AUTH_SALT',        '!`^ny8ls&|21EESk5C"geq84_&X#:)zQThdw*tKW#_Ur/;ZX*ur99r$8W`6p*t!k');
+define('SECURE_AUTH_SALT', 'Xl~lOJB@(XCtw3cV:#|z65C6U/K7c?f:UD%"u_ovb^XZyHjyDe&a(`4|qX4adzLj');
+define('LOGGED_IN_SALT',   'r$o/3_ud1`"%EVx)FvjmBp5AjcJH2k!m^2dkx#`Bfa8J9u"?8F$+XM78Kjqi+Kl)');
+define('NONCE_SALT',       '0P!(D~EVe:9^8J^Fi%GK1*SMbqdZ0u`IMl_MK"(0dlcaQ^9OyU!BibD&u&Li;p;G');
 
 /**#@-*/
 

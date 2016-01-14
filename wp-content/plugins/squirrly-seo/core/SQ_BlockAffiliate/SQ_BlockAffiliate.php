@@ -5,7 +5,11 @@
  */
 class SQ_BlockAffiliate extends SQ_BlockController {
 
-    function action() {
+    public function hookGetContent() {
+        parent::preloadSettings();
+    }
+
+    public function action() {
         parent::action();
         switch (SQ_Tools::getValue('action')) {
             //login action
@@ -31,19 +35,13 @@ class SQ_BlockAffiliate extends SQ_BlockController {
                     SQ_Tools::saveOptions('sq_affiliate_link', $return->affiliate_link);
                 } elseif (!empty($return->error)) {
                     //if an error is throw then ...
-                    $return->info = sprintf(__('Error: %s', _PLUGIN_NAME_), $return->error);
+                    $return->info = sprintf(__('Error: %s', _SQ_PLUGIN_NAME_), $return->error);
                 } else {
                     //if unknown error
-                    $return->error = __('An error occured. Mabe a network error :(', _PLUGIN_NAME_);
+                    $return->error = __('An error occured. Mabe a network error :(', _SQ_PLUGIN_NAME_);
                 }
                 break;
         }
     }
 
-    function hookGetContent() {
-        $this->options = SQ_Tools::$options;
-    }
-
 }
-
-?>

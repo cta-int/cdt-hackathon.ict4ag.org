@@ -10,7 +10,7 @@ class SQ_FrontController {
     public $model;
 
     /** @var boolean */
-    private $flush = true;
+    public $flush = true;
 
     /** @var object of the view class */
     public $view;
@@ -30,8 +30,7 @@ class SQ_FrontController {
 
         //IMPORTANT TO LOAD HOOKS HERE
         /* check if there is a hook defined in the controller clients class */
-        SQ_ObjController::getController('SQ_HookController', false)
-                ->setAdminHooks($this);
+        SQ_ObjController::getController('SQ_HookController', false)->setAdminHooks($this);
     }
 
     /**
@@ -43,17 +42,22 @@ class SQ_FrontController {
     public function init() {
 
         $this->view = SQ_ObjController::getController('SQ_DisplayController', false);
+        $this->view->setBlock($this->name);
 
-        if ($this->flush)
-            $this->output();
 
         /* load the blocks for this controller */
         SQ_ObjController::getController('SQ_ObjController', false)->getBlocks($this->name);
+
+        if ($this->flush) {
+            echo $this->output();
+        } else {
+            return $this->output();
+        }
     }
 
     protected function output() {
-        /* view is called from theme directory with the class name by defauls */
-        $this->view->output($this->name, $this);
+        $this->hookHead();
+        return $this->view->echoBlock($this);
     }
 
     /**
@@ -63,9 +67,6 @@ class SQ_FrontController {
      * @return void
      */
     public function run() {
-        /** check the admin condition */
-        if (!is_admin())
-            return;
 
         /* Load error class */
         SQ_ObjController::getController('SQ_Error', false);
@@ -81,9 +82,6 @@ class SQ_FrontController {
 
         /* show the admin menu and post actions */
         $this->loadMenu();
-
-        /* Load the Sitemap Generator */
-        SQ_ObjController::getController('SQ_Sitemap', false);
     }
 
     /**
@@ -101,10 +99,11 @@ class SQ_FrontController {
      *
      */
     protected function action() {
+
         // check to see if the submitted nonce matches with the
         // generated nonce we created
-        if (class_exists('wp_verify_nonce'))
-            if (!wp_verify_nonce(SQ_Tools::getValue(_SQ_NONCE_ID_), _SQ_NONCE_ID_))
+        if (function_exists('wp_verify_nonce'))
+            if (!wp_verify_nonce(SQ_Tools::getValue('nonce'), _SQ_NONCE_ID_))
                 die('Invalid request!');
     }
 
@@ -114,13 +113,11 @@ class SQ_FrontController {
      * @return void
      */
     public function hookHead() {
-        if (is_admin())
-            SQ_ObjController::getController('SQ_DisplayController', false)->init();
-
+        if (!is_admin())
+            return;
+        SQ_ObjController::getController('SQ_DisplayController', false)->init();
         SQ_ObjController::getController('SQ_DisplayController', false)
                 ->loadMedia($this->name);
     }
 
 }
-
-?>

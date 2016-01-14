@@ -3,205 +3,238 @@
  * Adds a setting tab in the Fetch Tweets admin pages. 
  * 
  * If you are modifying the template to create your own, modify this extended class.
- * The setting arrays follows the specifications of Admin Page Framework v2. 
+ * The setting arrays follow the specifications of Admin Page Framework v2. 
  * 
  * @package		Fetch Tweets
  * @subpackage	Single Template
  * @see			http://wordpress.org/plugins/admin-page-framework/
  */
-class FetchTweets_Template_Settings_Single extends FetchTweets_Template_Settings_Single_ {
-
-	/*
-	 * Modify these properties.
-	 * */
-	protected $strParentPageSlug = 'fetch_tweets_templates';	// in the url, the ... part of ?page=... 
-	protected $strParentTabSlug = 'single';	// in the url, the ... part of &tab=...
-	protected $strTemplateName = 'Single';	// the template name
+class FetchTweets_Template_Settings_Single extends FetchTweets_Template_Settings {
+    
+    /**
+     * Sets the page slug.
+     * 
+     * It is the ... part of ?page=... in the url.
+     */
+	protected $sParentPageSlug  = 'fetch_tweets_templates';	
+    
+    /**
+     * Defines the tab slug.
+     * 
+     * It is the ... part of &tab=... in the url.
+     */
+	protected $sParentTabSlug   = 'single';	
+    
+    /**
+     * The template name.
+     */
+	protected $sTemplateName    = 'Single';
+    
+    /**
+     * The section ID of the settings.
+     */
+	protected $sSectionID       = 'fetch_tweets_template_single';
 	
-	/*
-	 * Modify these methods. 
-	 * This defines form sections. Set the section ID and the description here.
-	 * The array structure follows the rule of Admin Page Framework. ( https://github.com/michaeluno/admin-page-framework )
-	 * */
-	public function addSettingSections( $arrSections ) {
+    /**
+     * Defines form sections. Set the section ID and the description here.
+     * 
+	 * @remark  The array structure follows the rule of Admin Page Framework. ( https://github.com/michaeluno/admin-page-framework )
+     */
+	public function addSettingSections( $aSections ) {
 			
-		$arrSections[] = array(
-			'strSectionID'		=> 'fetch_tweets_template_single',
-			'strPageSlug'		=> $this->strParentPageSlug,
-			'strTabSlug'		=> $this->strParentTabSlug,
-			'strTitle'			=> $this->strTemplateName,
-			'strDescription'	=> sprintf( 'Options for the %1$s template.', $this->strTemplateName ) . ' ' 
+		$aSections[ $this->sSectionID ] = array(
+			'section_id'	=> $this->sSectionID,
+			'page_slug'		=> $this->sParentPageSlug,
+			'tab_slug'		=> $this->sParentTabSlug,
+			'title'			=> $this->sTemplateName,
+			'description'	=> sprintf( 'Options for the %1$s template.', $this->sTemplateName ) . ' ' 
 				. __( 'These will be the default values and be overridden by the arguments passed directly by the widgets, the shortcode, or the PHP function.', 'fetch-tweets' ),
 		);
-		return $arrSections;
+		return $aSections;
 	
 	}
-	/*
-	 * This defines form fields. Return the field arrays. 
-	 * The array structure follows the rule of Admin Page Framework. ( https://github.com/michaeluno/admin-page-framework )
-	 * */
-	public function addSettingFields( $arrFields ) {
+	/**
+	 * Defines form fields. Return the field arrays. 
+     * 
+	 * @remark  The array structure follows the rule of Admin Page Framework. ( https://github.com/michaeluno/admin-page-framework )
+	 */
+	public function addSettingFields( $aFields ) {
 		
-		if ( ! class_exists( 'FetchTweets_Commons' ) ) return $arrFields;	// if the main class does not exist, do nothing.
+        // if the main class does not exist, do nothing.
+		if ( ! class_exists( 'FetchTweets_Commons' ) ) { return $aFields; }	
 				
-		$arrFields[] = array(	// avatar size
-			'strFieldID' => 'fetch_tweets_template_single_avatar_size',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Profile Image Size', 'fetch-tweets' ),
-			'strDescription' => __( 'The avatar size in pixel. Set 0 for no avatar.', 'fetch-tweets' ) . ' ' . __( 'Default', 'fetch-tweets' ) . ': 48',
-			'strType' => 'number',
+		$aFields[ $this->sSectionID ] = array();
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_avatar_size'] = array(	// avatar size
+			'field_id' => 'fetch_tweets_template_single_avatar_size',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Profile Image Size', 'fetch-tweets' ),
+			'description' => __( 'The avatar size in pixel. Set 0 for no avatar.', 'fetch-tweets' ) . ' ' . __( 'Default', 'fetch-tweets' ) . ': 48',
+			'type' => 'number',
 			'vSize' => 10,
-			'vDefault' => 48, 
+			'default' => 48, 
 		);				
-		$arrFields[] = array(
-			'strFieldID' => 'fetch_tweets_template_single_avatar_position',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Profile Image Position', 'fetch-tweets' ),
-			'strType' => 'radio',
-			'vLabel' => array(
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_avatar_position'] = array(	// avatar size
+			'field_id' => 'fetch_tweets_template_single_avatar_position',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Profile Image Position', 'fetch-tweets' ),
+			'type' => 'radio',
+			'label' => array(
 				'left' => __( 'Left', 'fetch-tweets' ),
 				'right' => __( 'Right', 'fetch-tweets' ),
 			),
-			'vDefault' => 'left', 
+			'default' => 'left', 
 		);			
-		$arrFields[] = array(	// width
-			'strFieldID' => 'fetch_tweets_template_single_width',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Width', 'fetch-tweets' ),
-			'strDescription' => __( 'The width of the output.', 'fetch-tweets' ) . ' ' . __( 'Default', 'fetch-tweets' ) . ': 100%',
-			'strType' => 'size',
-			'vSizeUnits' => array(
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_width'] = array( // width
+			'field_id' => 'fetch_tweets_template_single_width',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Width', 'fetch-tweets' ),
+			'description' => __( 'The width of the output.', 'fetch-tweets' ) . ' ' . __( 'Default', 'fetch-tweets' ) . ': 100%',
+			'type' => 'size',
+			'units' => array(
 				'%' => '%',
 				'px' => 'px',
 				'em' => 'em',
 			),
-			'vDefault' => array(
+			'default' => array(
 				'size'	=> 100,
 				'unit'	=> '%',
 			),
+			'delimiter' => '<br />',
 		);
-		$arrFields[] = array(	// height 
-			'strFieldID' => 'fetch_tweets_template_single_height',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Height', 'fetch-tweets' ),
-			'strDescription' => __( 'The height of the output.', 'fetch-tweets' ) . ' ' . __( 'Default', 'fetch-tweets' ) . ': 400px',
-			'strType' => 'size',
-			'vSizeUnits' => array(
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_height'] = array(  // height 
+			'field_id' => 'fetch_tweets_template_single_height',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Height', 'fetch-tweets' ),
+			'description' => __( 'The height of the output.', 'fetch-tweets' ) . ' ' . __( 'Default', 'fetch-tweets' ) . ': 400px',
+			'type' => 'size',
+			'units' => array(
 				'%' => '%',
 				'px' => 'px',
 				'em' => 'em',
 			),
-			'vDefault' => array(
+			'default' => array(
 				'size'	=> 400,
 				'unit'	=> 'px',
 			),
+			'delimiter' => '<br />',
 		);
-		
-		$arrFields[] = array(	// margins
-			'strFieldID' => 'fetch_tweets_template_single_margins',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Margins', 'fetch-tweets' ),
-			'strDescription' => __( 'The margins of the output element. Leave them empty not to set any margin.', 'fetch-tweets' ),
-			'strType' => 'size',
-			'vLabel' => array(
-				'top' => __( 'Top', 'fetch-tweets' ),
-				'right' => __( 'Right', 'fetch-tweets' ),
-				'bottom' => __( 'Bottom', 'fetch-tweets' ),
-				'left' => __( 'Left', 'fetch-tweets' ),
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_margins'] = array(  // margins
+			'field_id' => 'fetch_tweets_template_single_margins',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Margins', 'fetch-tweets' ),
+			'description' => __( 'The margins of the output element. Leave them empty not to set any margin.', 'fetch-tweets' ),
+			'type' => 'size',
+			'units' => array( '%' => '%', 'px' => 'px', 'em' => 'em', ),
+			'delimiter' => '<br />',
+			'label'	=>	__( 'Top', 'fetch-tweets' ),
+			array(
+				'label'	=>	__( 'Right', 'fetch-tweets' ),
 			),
-			'vSizeUnits' => array( '%' => '%', 'px' => 'px', 'em' => 'em', ),
-		);		
-		$arrFields[] = array(	// paddings
-			'strFieldID' => 'fetch_tweets_template_single_paddings',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Paddings', 'fetch-tweets' ),
-			'strDescription' => __( 'The paddings of the output element. Leave them empty not to set any padding.', 'fetch-tweets' ),
-			'strType' => 'size',
-			'vLabel' => array(
-				'top' => __( 'Top', 'fetch-tweets' ),
-				'right' => __( 'Right', 'fetch-tweets' ),
-				'bottom' => __( 'Bottom', 'fetch-tweets' ),
-				'left' => __( 'Left', 'fetch-tweets' ),
+			array(
+				'label'	=>	__( 'Bottom', 'fetch-tweets' ),
 			),
-			'vSizeUnits' => array( '%' => '%', 'px' => 'px', 'em' => 'em', ),
+			array(
+				'label'	=>	__( 'Left', 'fetch-tweets' ),
+			),						
 		);		
-				
-		$arrFields[] = array(	// color picker
-			'strFieldID' => 'fetch_tweets_template_single_background_color',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Background Color', 'fetch-tweets' ),
-			'strType' => 'color',
-			'vDefault' => 'transparent',
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_paddings'] = array(	// paddings
+			'field_id' => 'fetch_tweets_template_single_paddings',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Paddings', 'fetch-tweets' ),
+			'description' => __( 'The paddings of the output element. Leave them empty not to set any padding.', 'fetch-tweets' ),
+			'type' => 'size',
+			'units' => array( '%' => '%', 'px' => 'px', 'em' => 'em', ),
+			'delimiter' => '<br />',
+			'label'	=>	__( 'Top', 'fetch-tweets' ),
+			array(
+				'label'	=>	__( 'Right', 'fetch-tweets' ),
+			),
+			array(
+				'label'	=>	__( 'Bottom', 'fetch-tweets' ),
+			),
+			array(
+				'label'	=>	__( 'Left', 'fetch-tweets' ),
+			),						
+		);		
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_background_color'] = array( // color picker
+			'field_id' => 'fetch_tweets_template_single_background_color',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Background Color', 'fetch-tweets' ),
+			'type' => 'color',
+			'default' => 'transparent',
 		);	
-		$arrFields[] = array(
-			'strFieldID' => 'fetch_tweets_template_single_intent_buttons',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Intent Buttons', 'fetch-tweets' ),
-			'strDescription' => __( 'These are for Favourite, Reply, and Retweet buttons.', 'fetch-tweets' ),
-			'strType' => 'radio',
-			'vLabel' => array(  
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_intent_buttons'] = array(
+			'field_id' => 'fetch_tweets_template_single_intent_buttons',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Intent Buttons', 'fetch-tweets' ),
+			'description' => __( 'These are for Favourite, Reply, and Retweet buttons.', 'fetch-tweets' ),
+			'type' => 'radio',
+			'label' => array(  
 				1 => __( 'Both icons and text', 'fetch-tweets' ),
 				2 => __( 'Only icons', 'fetch-tweets' ),
 				3 => __( 'Only text', 'fetch-tweets' ),
 			),
-			'vDefault' => 2,
+			'default' => 2,
 		);
-		$arrFields[] = array(
-			'strFieldID' => 'fetch_tweets_template_single_intent_script',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Intent Button Script', 'fetch-tweets' ),
-			'strType' => 'checkbox',
-			'vLabel' => __( 'Insert the intent button script that enables a pop-up window for Favorite, Reply, and Retweet.', 'fetch-tweets' ),
-			'vDefault' => 1,
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_intent_script'] = array(
+			'field_id' => 'fetch_tweets_template_single_intent_script',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Intent Button Script', 'fetch-tweets' ),
+			'type' => 'checkbox',
+			'label' => __( 'Insert the intent button script that enables a pop-up window for Favorite, Reply, and Retweet.', 'fetch-tweets' ),
+			'default' => 1,
 		);	
-		$arrFields[] = array(
-			'strFieldID' => 'fetch_tweets_template_single_follow_button_elements',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Follow Button Elements', 'fetch-tweets' ),
-			'strType' => 'checkbox',
-			'vLabel' => array(
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_follow_button_elements'] = array(
+			'field_id' => 'fetch_tweets_template_single_follow_button_elements',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Follow Button Elements', 'fetch-tweets' ),
+			'type' => 'checkbox',
+			'label' => array(
 				'screen_name' => __( 'Screen Name', 'fetch-tweets' ),
 				'follower_count' => __( 'Follower Count', 'fetch-tweets' ),
 			),
-			'vDefault' => array(
+			'default' => array(
 				'screen_name' => 0,
 				'follower_count' => 0,
 			),
 		);		
-		$arrFields[] = array(	// visibilities
-			'strFieldID' => 'fetch_tweets_template_single_visibilities',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strTitle' => __( 'Visibilities', 'fetch-tweets' ),
-			'strType' => 'checkbox',
-			'vLabel' => array(
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_visibilities'] = array(	// visibilities
+			'field_id' => 'fetch_tweets_template_single_visibilities',
+			'section_id' => $this->sSectionID,
+			'title' => __( 'Visibility', 'fetch-tweets' ),
+			'type' => 'checkbox',
+			'label' => array(
 				'avatar'			=> __( 'Profile Image', 'fetch-tweets' ),
 				'user_name'			=> __( 'User Name', 'fetch-tweets' ),
 				'follow_button'		=> __( 'Follow Button', 'fetch-tweets' ),
 				'user_description'	=> __( 'User Description', 'fetch-tweets' ),
 				'time'				=> __( 'Time', 'fetch-tweets' ),
 				'intent_buttons'	=> __( 'Intent Buttons', 'fetch-tweets' ),
+                'separator'         => __( 'Separator', 'fetch-tweets' ),
 			),
-			'vDefault' => array(
+			'default' => array(
 				'avatar'			=> true,
 				'user_name'			=> true,
 				'follow_button'		=> true,
 				'user_description'	=> true,
 				'time'				=> true,
 				'intent_buttons'	=> true,
+                'separator'         => true,
 			),
 		);		
-		$arrFields[] = array(  // single button
-			'strFieldID' => 'fetch_tweets_template_single_submit',
-			'strSectionID' => 'fetch_tweets_template_single',
-			'strType' => 'submit',
-			'strBeforeField' => "<div class='right-button'>",
-			'strAfterField' => "</div>",
-			'vLabelMinWidth' => 0,
-			'vLabel' => __( 'Save Changes', 'fetch-tweets' ),
-			'vClassAttribute' => 'button button-primary',
+		$aFields[ $this->sSectionID ]['fetch_tweets_template_single_submit'] = array( // single button
+			'field_id' => 'fetch_tweets_template_single_submit',
+			'section_id' => $this->sSectionID,
+			'type' => 'submit',
+			'before_field' => "<div class='right-button'>",
+			'after_field' => "</div>",
+			'label' => __( 'Save Changes', 'fetch-tweets' ),
+			'attributes'	=>	array(
+				'class'	=>	'button button-primary',
+			),
 		);
 
-		return $arrFields;		
+		return $aFields;		
 	}
 	
 	public function validateSettings( $arrInput, $arrOriginal ) {
@@ -211,74 +244,4 @@ class FetchTweets_Template_Settings_Single extends FetchTweets_Template_Settings
 	}
 	
 }
-new FetchTweets_Template_Settings_Single;
-
-
-/*
- * No need to modify the following class.
- * */
-abstract class FetchTweets_Template_Settings_Single_ {
-	
-	// Do not modify these properties.
-	protected $strParentAdminPaggeClassName = 'FetchTweets_AdminPage';
-	protected $strTemplateID = '';	// assigned in the constructor.
-	
-	/*
-	 * These must be overridden in the extended class.
-	 * */
-	protected $strParentPageSlug = '';	// in the url, the ... part in ?page=... 
-	protected $strParentTabSlug = '';	// in the url, the ... part in &tab=...
-	protected $strTemplateName = '';	// the template name
-	
-	/*
-	 * No need to modify the constructor.
-	 * */
-	public function __construct() {
-		
-		$this->strTemplateID = md5( dirname( __FILE__ ) );
-		
-		// "{$this->oProps->strClassName}_{$strPageSlug}_tabs",
-		add_filter( $this->strParentAdminPaggeClassName . "_" . $this->strParentPageSlug . "_tabs", array( $this, 'addInPageTab' ) );
-		
-		// "{$this->oProps->strClassName}_setting_sections",
-		add_filter( $this->strParentAdminPaggeClassName . "_setting_sections", array( $this, 'addSettingSections' ) );
-		
-		// "{$this->oProps->strClassName}_setting_fields",
-		add_filter( $this->strParentAdminPaggeClassName . "_setting_fields", array( $this, 'addSettingFields' ) );
-		
-		// validation_{page slug}_{tab slug}
-		add_filter( "validation_{$this->strParentPageSlug}_{$this->strParentTabSlug}", array( $this, 'validateSettings' ), 10, 2 );
-			
-		// Adds the Settings link in the template listing table.
-		add_filter( 'fetch_tweets_filter_template_listing_table_action_links', array( $this, 'addSettingsLink' ), 10, 2 );
-		
-	}
-	
-	/*
-	 * 	No need to modify these method.
-	 * */
-	public function addInPageTab( $arrTabs ) {
-	
-		return array(
-			$this->strParentTabSlug => array(
-				'strPageSlug'	=> $this->strParentPageSlug,
-				'strTitle'		=> $this->strTemplateName,
-				'strTabSlug'	=> $this->strParentTabSlug,
-				'numOrder'		=> 20
-			)
-		) + $arrTabs;
-		
-	}
-	public function addSettingsLink( $arrLinks, $strTemplateID ) {
-				
-		if ( $strTemplateID != $this->strTemplateID ) return $arrLinks;
-
-		array_unshift(	
-			$arrLinks,
-			"<a href='?post_type=" . FetchTweets_Commons::PostTypeSlug . "&page={$this->strParentPageSlug}&tab={$this->strParentTabSlug}'>" . __( 'Settings', 'fetch-tweets' ) . "</a>" 
-		); 
-		return $arrLinks;			
-		
-	}
-	
-}
+new FetchTweets_Template_Settings_Single( dirname( __FILE__ ) );

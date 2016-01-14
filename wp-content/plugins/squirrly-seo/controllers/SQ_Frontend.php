@@ -4,127 +4,166 @@ class SQ_Frontend extends SQ_FrontController {
 
     public static $options;
 
-    function __construct() {
-           if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-              return;
-            if (strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false)
-              return;
+    public function __construct() {
+
+        if ($this->_isAjax()) {
+            return;
+        }
+
         parent::__construct();
-
         SQ_ObjController::getController('SQ_Tools', false);
-        self::$options = SQ_Tools::getOptions();
 
-        if (SQ_Tools::getValue('sq_use') == 'on')
-            self::$options['sq_use'] = 1;
-        elseif (SQ_Tools::getValue('sq_use') == 'off')
-            self::$options['sq_use'] = 0;
-    }
+        if (SQ_Tools::$options['sq_use'] == 1) {
+            /* Check if sitemap is on  */
+            if (SQ_Tools::$options['sq_auto_sitemap'] == 1) {
+                /* Load the Sitemap  */
+                SQ_ObjController::getController('SQ_Sitemaps');
+            }
 
-    /**
-     * Called after plugins are loaded
-     */
-    function hookLoaded() {
-        if (self::$options['sq_use'] == 1) {
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-              return;
-            if (strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false)
-              return;
-            //Use buffer only for meta Title
-            //if(self::$options['sq_auto_title'] == 1)
-            $this->model->startBuffer();
+            //validate custom arguments for favicon and sitemap
+            add_filter('query_vars', array($this, 'validateParams'), 1, 1);
+
+            if (!$this->_isAjax()) {
+                add_filter('sq_title', array($this->model, 'clearTitle'));
+                add_filter('sq_description', array($this->model, 'clearDescription'));
+
+                add_action('plugins_loaded', array($this->model, 'startBuffer'));
+                //flush the header with the title and removing duplicates
+                add_action('wp_head', array($this->model, 'flushHeader'));
+                add_action('shutdown', array($this->model, 'flushHeader'));
+            }
+
+            if (SQ_Tools::$options['sq_url_fix'] == 1) {
+                add_action('the_content', array($this, 'fixFeedLinks'), 11);
+            }
         }
     }
 
-    function action() {
+    private function _isAjax() {
+        if (isset($_SERVER['PHP_SELF']) && strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false)
+            return true;
 
-    }
-
-    /**
-     * Set the unique visitor cookie for the SQ_Traffic record
-     */
-    function hookFrontinit() {
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-              return;
-            if (strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false)
-              return;
-        $traffic = SQ_ObjController::getController('SQ_Traffic', false);
-        if (is_object($traffic))
-            $traffic->saveCookie();
+        return false;
     }
 
     /**
      * Hook the Header load
      */
     public function hookFronthead() {
-            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-              return;
-            if (strpos($_SERVER['PHP_SELF'], '/admin-ajax.php') !== false)
-              return;
-        echo $this->model->setStart();
-        parent::hookHead();
 
-        SQ_Tools::dump(self::$options, $GLOBALS['wp_query']); //output debug
+        if (!$this->_isAjax()) {
+            if (SQ_Tools::$options['sq_use'] == 1) {
+                echo $this->model->setStartTag();
+            }
 
+            SQ_ObjController::getController('SQ_DisplayController', false)
+                    ->loadMedia(_SQ_THEME_URL_ . 'css/sq_frontend.css');
+        }
+    }
 
-        if (isset(self::$options['sq_use']) && (int) self::$options['sq_use'] == 1) {
-            echo $this->model->setHeader();
+    /**
+     * Called after plugins are loaded
+     */
+    public function hookPreload() {
+        //Check for sitemap and robots
+        if (SQ_Tools::$options['sq_use'] == 1) {
+            if (isset($_SERVER['REQUEST_URI']) && SQ_Tools::$options['sq_auto_robots'] == 1) {
+                if (substr(strrchr($_SERVER['REQUEST_URI'], "/"), 1) == "robots.txt" || $_SERVER['REQUEST_URI'] == "/robots.txt") {
+                    $this->model->robots();
+                }
+            }
 
-            //Use buffer only for meta Title
-            //if(self::$options['sq_auto_title'] == 1)
-            $this->model->flushHeader();
+            //check the action call
+            $this->action();
         }
     }
 
     /**
      * Change the image path to absolute when in feed
      */
-    function hookFrontcontent($content) {
-        if (!is_feed())
-            return $content;
+    public function fixFeedLinks($content) {
+        if (is_feed()) {
+            $find = $replace = $urls = array();
 
+            @preg_match_all('/<img[^>]*src=[\'"]([^\'"]+)[\'"][^>]*>/i', $content, $out);
+            if (is_array($out)) {
+                if (!is_array($out[1]) || empty($out[1]))
+                    return $content;
 
-        $find = $replace = $urls = array();
-
-        @preg_match_all('/<img[^>]*src="([^"]+)"[^>]*>/i', $content, $out);
-        if (is_array($out)) {
-            if (!is_array($out[1]) || empty($out[1]))
-                return $content;
-
-            foreach ($out[1] as $row) {
-                if (strpos($row, '//') === false) {
-                    if (!in_array($row, $urls)) {
-                        $urls[] = $row;
+                foreach ($out[1] as $row) {
+                    if (strpos($row, '//') === false) {
+                        if (!in_array($row, $urls)) {
+                            $urls[] = $row;
+                        }
                     }
                 }
             }
-        }
-        if (!is_array($urls) || (is_array($urls) && empty($urls)))
-            return $content;
 
-        foreach ($urls as $url) {
-            $find[] = $url;
-            $replace[] = get_bloginfo('url') . $url;
-        }
-        if (!empty($find) && !empty($replace)) {
-            $content = str_replace($find, $replace, $content);
-        }
+            @preg_match_all('/<a[^>]*href=[\'"]([^\'"]+)[\'"][^>]*>/i', $content, $out);
+            if (is_array($out)) {
+                if (!is_array($out[1]) || empty($out[1]))
+                    return $content;
 
+                foreach ($out[1] as $row) {
+                    if (strpos($row, '//') === false) {
+                        if (!in_array($row, $urls)) {
+                            $urls[] = $row;
+                        }
+                    }
+                }
+            }
+            if (!is_array($urls) || (is_array($urls) && empty($urls)))
+                return $content;
+
+            foreach ($urls as $url) {
+                $find[] = $url;
+                $replace[] = get_bloginfo('url') . $url;
+            }
+            if (!empty($find) && !empty($replace)) {
+                $content = str_replace($find, $replace, $content);
+            }
+        }
         return $content;
     }
 
     /**
-     * Hook Footer load to save the visit and to close the buffer
+     * Validate the params for getting the basic info from the server
+     * eg favicon.ico
+     *
+     * @param array $vars
+     * @return $vars
      */
-    function hookFrontfooter() {
-        if (isset(self::$options['sq_use']) && (int) self::$options['sq_use'] == 1) {
-            //Use buffer only for meta Title
-            //if(self::$options['sq_auto_title'] == 1)
-            $this->model->flushHeader();
+    public function validateParams($vars) {
+        $vars[] = 'feed';
+        $vars[] = 'sq_get';
+        $vars[] = 'sq_size';
+        return $vars;
+    }
+
+    public function action() {
+        switch (get_query_var('sq_get')) {
+            case 'favicon':
+                if (SQ_Tools::$options['favicon'] <> '') {
+                    //show the favico file
+                    SQ_Tools::setHeader('ico');
+                    readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon']);
+                    exit();
+                }
+                break;
+            case 'touchicon':
+                $size = get_query_var('sq_size');
+                if (SQ_Tools::$options['favicon'] <> '') {
+                    //show the favico file
+                    SQ_Tools::setHeader('png');
+                    if ($size <> '') {
+                        readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon'] . get_query_var('sq_size'));
+                    } else {
+                        readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon']);
+                    }
+                    exit();
+                }
+                break;
         }
-        //RECORD THE TRAFFIC
-        $this->model->recordTraffic();
     }
 
 }
-
-?>

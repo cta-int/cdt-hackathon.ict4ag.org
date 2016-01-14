@@ -10,7 +10,7 @@ class SQ_BlockController {
     protected $model;
 
     /** @var boolean */
-    private $flush = true;
+    public $flush = true;
 
     /** @var object of the view class */
     protected $view;
@@ -38,20 +38,34 @@ class SQ_BlockController {
     public function init() {
 
         $this->view = SQ_ObjController::getController('SQ_DisplayController', false);
+        $this->view->setBlock($this->name);
 
         /* check if there is a hook defined in the block class */
         SQ_ObjController::getController('SQ_HookController', false)
                 ->setBlockHooks($this);
 
-        if ($this->flush)
-            $this->output();
+        if ($this->flush) {
+            echo $this->output();
+        } else {
+            return $this->output();
+        }
     }
 
     protected function output() {
         $this->hookHead();
+        return $this->view->echoBlock($this);
+    }
 
-        /* view is called from theme directory with the class name by default */
-        $this->view->output($this->name, $this);
+    public function preloadSettings() {
+
+        echo '<script type="text/javascript">
+                   var __blog_url = "' . get_bloginfo('url') . '";
+                   var __token = "' . SQ_Tools::$options['sq_api'] . '";
+                   var __api_url = "' . _SQ_API_URL_ . '";
+                    jQuery(document).ready(function () {
+                         sq_getHelp("' . str_replace("sq_block", "", strtolower($this->name)) . '", "content"); 
+                    });
+             </script>';
     }
 
     /**
@@ -61,8 +75,8 @@ class SQ_BlockController {
     protected function action() {
         // check to see if the submitted nonce matches with the
         // generated nonce we created
-        if (class_exists('wp_verify_nonce'))
-            if (!wp_verify_nonce(SQ_Tools::getValue(_SQ_NONCE_ID_), _SQ_NONCE_ID_))
+        if (function_exists('wp_verify_nonce'))
+            if (!wp_verify_nonce(SQ_Tools::getValue('nonce'), _SQ_NONCE_ID_))
                 die('Invalid request!');
     }
 
@@ -72,12 +86,10 @@ class SQ_BlockController {
      * @return void
      */
     protected function hookHead() {
-
+        if (!is_admin())
+            return;
         SQ_ObjController::getController('SQ_DisplayController', false)
                 ->loadMedia($this->name);
     }
 
-    /** @todo _ GASESTE O CALE SA INCARC CSS PENTRU BLOCURI */
 }
-
-?>

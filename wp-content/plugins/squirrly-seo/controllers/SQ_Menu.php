@@ -8,97 +8,151 @@ class SQ_Menu extends SQ_FrontController {
     /** @var array snippet */
     var $options = array();
 
-    //
-    function init() {
-
+    public function __construct() {
+        parent::__construct();
+        add_filter('rewrite_rules_array', array(SQ_ObjController::getBlock('SQ_BlockSettingsSeo'), 'rewrite_rules'), 999, 1);
+        add_action('admin_bar_menu', array($this, 'hookTopmenu'), 999);
     }
 
-    function upgradeRedirect() {
-        // Bail if no activation redirect
-        if (!get_transient('sq_upgrade'))
-            return;
-
-        // Delete the redirect transient
-        delete_transient('sq_upgrade');
-
-        if (SQ_Tools::$options['sq_howto'] == 1)
-            wp_safe_redirect(admin_url('admin.php?page=sq_howto'));
-        else
-            wp_safe_redirect(admin_url('admin.php?page=sq_dashboard'));
-        exit;
-    }
-
-    /*
-     * Creates the Setting menu in Wordpress
+    /**
+     * Hook the Admin load
      */
-
-    public function hookMenu() {
-        $this->upgradeRedirect();
-        $first_page = preg_replace('/\s/', '_', _SQ_NAME_);
-
-        SQ_Tools::checkErrorSettings(true);
-        $this->post_type = array('post', 'page', 'movie', 'product', 'download', 'shopp_page_shopp-products');
-
-        //add custom post types
-        if (SQ_Tools::getIsset('post_type'))
-            @array_push($this->post_type, SQ_Tools::getValue('post_type'));
-        elseif (SQ_Tools::getIsset('post')) {
-            $post = get_post(SQ_Tools::getValue('post'));
-            @array_push($this->post_type, $post->post_type);
-        } elseif (SQ_Tools::getIsset('id')) {
-            $post = get_post(SQ_Tools::getValue('id'));
-            @array_push($this->post_type, $post->post_type);
-        }
-
-        if (SQ_Tools::$options['sq_howto'] == 1)
-            $first_page = 'sq_howto';
-        else
-            $first_page = 'sq_dashboard';
+    public function hookInit() {
 
         /* add the plugin menu in admin */
-        if (current_user_can('administrator')) {
-            $this->model->addMenu(array(ucfirst(_SQ_NAME_),
-                'Squirrly' . SQ_Tools::showNotices(SQ_Tools::$errors_count, 'errors_count'),
-                'edit_posts',
-                $first_page,
-                null,
-                _SQ_THEME_URL_ . 'img/menu_icon_16.png'
-            ));
-            if (SQ_Tools::$options['sq_howto'] == 1) {
-                $this->model->addSubmenu(array($first_page,
-                    ucfirst(_SQ_NAME_) . __(' getting started', _PLUGIN_NAME_),
-                    __('Getting started', _PLUGIN_NAME_),
-                    'edit_posts',
-                    'sq_howto',
-                    array(SQ_ObjController::getBlock('SQ_BlockHelp'), 'init')
-                ));
-            }
-            if (SQ_Tools::$options['sq_api'] <> '') {
-                $this->model->addSubmenu(array($first_page,
-                    ucfirst(_SQ_NAME_) . __(' dashboard', _PLUGIN_NAME_),
-                    __('Dashboard', _PLUGIN_NAME_),
-                    'edit_posts',
-                    'sq_dashboard',
-                    array(SQ_ObjController::getBlock('SQ_BlockDashboard'), 'init')
-                ));
+        if (current_user_can('manage_options')) {
+            //check if activated
+            if (get_transient('sq_activate') == 1) {
+                // Delete the redirect transient
+                delete_transient('sq_activate');
+                SQ_Action::apiCall('sq/user/settings', array('settings' => json_encode(SQ_Tools::getBriefOptions())), 10);
 
-                $this->model->addSubmenu(array($first_page,
-                    ucfirst(_SQ_NAME_) . __(' settings', _PLUGIN_NAME_),
-                    __('Settings', _PLUGIN_NAME_) . SQ_Tools::showNotices(SQ_Tools::$errors_count, 'errors_count'),
-                    'edit_posts',
-                    preg_replace('/\s/', '_', _SQ_NAME_),
-                    array($this, 'showMenu')
-                ));
+                wp_safe_redirect(admin_url('admin.php?page=sq_dashboard'));
+                exit();
             }
-            $this->model->addSubmenu(array($first_page,
-                __('Make money with ', _PLUGIN_NAME_) . ucfirst(_SQ_NAME_),
-                __('Make money', _PLUGIN_NAME_),
+
+            if (get_transient('sq_rewrite') == 1) {
+                // Delete the redirect transient
+                delete_transient('sq_rewrite');
+                global $wp_rewrite;
+                $wp_rewrite->flush_rules();
+            }
+
+            //Check if there are expected upgrades
+            SQ_Tools::checkUpgrade();
+        }
+        //activate the cron job if not exists
+        if (!wp_get_schedule('sq_processCron')) {
+            wp_schedule_event(time(), 'hourly', 'sq_processCron');
+        }
+    }
+
+    /**
+     * Add a menu in Admin Bar
+     *
+     * @param WP_Admin_Bar $wp_admin_bar
+     */
+    public function hookTopmenu($wp_admin_bar) {
+        $wp_admin_bar->add_node(array(
+            'id' => 'sq_posts',
+            'title' => __('See Your Rank on Google', _SQ_PLUGIN_NAME_),
+            'href' => admin_url('admin.php?page=sq_posts'),
+            'parent' => false
+        ));
+    }
+
+    /**
+     * Creates the Setting menu in Wordpress
+     */
+    public function hookMenu() {
+
+        $this->post_type = SQ_Tools::$options['sq_post_types'];
+
+        //Push the Analytics Check
+        if (strpos($_SERVER['REQUEST_URI'], '?page=sq_dashboard') !== false) {
+            SQ_Tools::saveOptions('sq_dashboard', 1);
+        }
+        if (strpos($_SERVER['REQUEST_URI'], '?page=sq_analytics') !== false) {
+            SQ_Tools::saveOptions('sq_analytics', 1);
+        }
+
+        $analytics_alert = 0;
+        if (SQ_ObjController::getModel('SQ_Post')->countKeywords() > 0 && SQ_Tools::$options['sq_analytics'] == 0) {
+            $analytics_alert = 1;
+            if (!get_transient('sq_analytics')) {
+                set_transient('sq_analytics', time(), (60 * 60 * 24 * 7));
+            } else {
+                $time_loaded = get_transient('sq_analytics');
+                if (time() - $time_loaded > (60 * 60 * 24 * 3) && time() - $time_loaded < (60 * 60 * 24 * 14)) {
+                    SQ_Error::setError(__('Check out the Squirrly Analytics section. <a href="admin.php?page=sq_posts" title="Squirrly Analytics">Click here</a>', _SQ_PLUGIN_NAME_));
+                }
+            }
+        }
+
+        $dashboard_alert = (int) (SQ_Tools::$options['sq_dashboard'] == 0);
+
+
+
+///////////////
+
+        $this->model->addMenu(array(ucfirst(_SQ_NAME_),
+            'Squirrly' . SQ_Tools::showNotices(SQ_Tools::$errors_count, 'errors_count'),
+            'edit_posts',
+            'sq_dashboard',
+            null,
+            _SQ_THEME_URL_ . 'img/settings/menu_icon_16.png'
+        ));
+
+        $this->model->addSubmenu(array('sq_dashboard',
+            ucfirst(_SQ_NAME_) . __(' dashboard', _SQ_PLUGIN_NAME_),
+            ( (SQ_Tools::$options['sq_api'] == '') ? __('First Step', _SQ_PLUGIN_NAME_) : __('Dashboard', _SQ_PLUGIN_NAME_)) . SQ_Tools::showNotices($dashboard_alert, 'errors_count'),
+            'edit_posts',
+            'sq_dashboard',
+            array(SQ_ObjController::getBlock('SQ_BlockDashboard'), 'init')
+        ));
+        if (SQ_Tools::$options['sq_api'] <> '') {
+            $this->model->addSubmenu(array('sq_dashboard',
+                ucfirst(_SQ_NAME_) . __(' post list', _SQ_PLUGIN_NAME_),
+                __('Performance <br />Analytics', _SQ_PLUGIN_NAME_) . SQ_Tools::showNotices($analytics_alert, 'errors_count'),
                 'edit_posts',
-                'sq_affiliate',
-                array(SQ_ObjController::getBlock('SQ_BlockAffiliate'), 'init')
+                'sq_posts',
+                array(SQ_ObjController::getBlock('SQ_BlockPostsAnalytics'), 'init')
+            ));
+
+
+
+            $this->model->addSubmenu(array('sq_dashboard',
+                ucfirst(_SQ_NAME_) . __(' settings', _SQ_PLUGIN_NAME_),
+                __('SEO', _SQ_PLUGIN_NAME_) . SQ_Tools::showNotices(SQ_Tools::$errors_count, 'errors_count'),
+                'manage_options',
+                'sq_seo',
+                array(SQ_ObjController::getBlock('SQ_BlockSettingsSeo'), 'init')
+            ));
+
+            $this->model->addSubmenu(array('sq_dashboard',
+                ucfirst(_SQ_NAME_) . __(' Settings', _SQ_PLUGIN_NAME_),
+                __('Settings', _SQ_PLUGIN_NAME_),
+                'manage_options',
+                'sq_settings',
+                array(SQ_ObjController::getBlock('SQ_BlockSettings'), 'init')
+            ));
+
+            $this->model->addSubmenu(array('sq_dashboard',
+                ucfirst(_SQ_NAME_) . __(' account info', _SQ_PLUGIN_NAME_),
+                __('Account Info', _SQ_PLUGIN_NAME_),
+                'manage_options',
+                'sq_account',
+                array(SQ_ObjController::getBlock('SQ_BlockAccount'), 'init')
             ));
         }
 
+        $this->model->addSubmenu(array('sq_dashboard',
+            __('Become an Affiliate with ', _SQ_PLUGIN_NAME_) . ucfirst(_SQ_NAME_),
+            __('Affiliate plan', _SQ_PLUGIN_NAME_),
+            'manage_options',
+            'sq_affiliate',
+            array(SQ_ObjController::getBlock('SQ_BlockAffiliate'), 'init')
+        ));
 
         foreach ($this->post_type as $type)
             $this->model->addMeta(array('post' . _SQ_NAME_,
@@ -108,149 +162,44 @@ class SQ_Menu extends SQ_FrontController {
                 'side',
                 'high'
             ));
-        if (SQ_ObjController::getController('SQ_PostMiddle'))
-            foreach ($this->post_type as $type)
-                $this->model->addMeta(array('postmiddle' . _SQ_NAME_,
-                    __('Squirrly Article Rank', _PLUGIN_NAME_),
-                    array(SQ_ObjController::getController('SQ_PostMiddle'), 'init'),
-                    $type,
-                    'normal',
-                    'high'
-                ));
-
 
         //Add the Rank in the Posts list
         $postlist = SQ_ObjController::getController('SQ_PostsList');
-        if (is_object($postlist))
+        if (is_object($postlist)) {
             $postlist->init();
-    }
+        }
 
-    /**
-     * Show the menu content after click event
-     *
-     * @return void
-     */
-    function showMenu() {
-
-        SQ_Tools::checkErrorSettings();
-        /* Force call of error display */
-        SQ_ObjController::getController('SQ_Error', false)->hookNotices();
-
-
-        /* Get the options from Database */
-        $this->options = SQ_Tools::$options;
-        SQ_ObjController::getBlock('SQ_BlockSupport')->init();
-        parent::init();
-    }
-
-    /**
-     * Called when Post action is triggered
-     *
-     * @return void
-     */
-    public function action() {
-        parent::action();
-
-
-        switch (SQ_Tools::getValue('action')) {
-
-            case 'sq_settings_update':
-                if (SQ_Tools::getValue('sq_use') == '')
-                    return;
-
-                SQ_Tools::saveOptions('sq_use', (int) SQ_Tools::getValue('sq_use'));
-                SQ_Tools::saveOptions('sq_auto_title', (int) SQ_Tools::getValue('sq_auto_title'));
-                SQ_Tools::saveOptions('sq_auto_description', (int) SQ_Tools::getValue('sq_auto_description'));
-                SQ_Tools::saveOptions('sq_auto_canonical', (int) SQ_Tools::getValue('sq_auto_canonical'));
-                SQ_Tools::saveOptions('sq_auto_sitemap', (int) SQ_Tools::getValue('sq_auto_sitemap'));
-                SQ_Tools::saveOptions('sq_auto_meta', (int) SQ_Tools::getValue('sq_auto_meta'));
-                SQ_Tools::saveOptions('sq_auto_favicon', (int) SQ_Tools::getValue('sq_auto_favicon'));
-                SQ_Tools::saveOptions('sq_auto_facebook', (int) SQ_Tools::getValue('sq_auto_facebook'));
-                SQ_Tools::saveOptions('sq_auto_twitter', (int) SQ_Tools::getValue('sq_auto_twitter'));
-
-                $sq_twitter_account = SQ_Tools::getValue('sq_twitter_account');
-                if ($sq_twitter_account <> '')
-                    if (strpos($sq_twitter_account, '@') === false)
-                        $sq_twitter_account = '@' . $sq_twitter_account;
-                SQ_Tools::saveOptions('sq_twitter_account', $sq_twitter_account);
-
-                SQ_Tools::saveOptions('sq_auto_seo', (int) SQ_Tools::getValue('sq_auto_seo'));
-                SQ_Tools::saveOptions('sq_fp_title', SQ_Tools::getValue('sq_fp_title'));
-                SQ_Tools::saveOptions('sq_fp_description', SQ_Tools::getValue('sq_fp_description'));
-                SQ_Tools::saveOptions('sq_fp_keywords', SQ_Tools::getValue('sq_fp_keywords'));
-
-
-
-                SQ_Tools::saveOptions('sq_google_plus', SQ_Tools::getValue('sq_google_plus'));
-                SQ_Tools::saveOptions('sq_google_wt', $this->model->checkGoogleWTCode(SQ_Tools::getValue('sq_google_wt')));
-                SQ_Tools::saveOptions('sq_google_analytics', $this->model->checkGoogleAnalyticsCode(SQ_Tools::getValue('sq_google_analytics')));
-                SQ_Tools::saveOptions('sq_facebook_insights', $this->model->checkFavebookInsightsCode(SQ_Tools::getValue('sq_facebook_insights')));
-                SQ_Tools::saveOptions('sq_bing_wt', $this->model->checkBingWTCode(SQ_Tools::getValue('sq_bing_wt')));
-                SQ_Tools::saveOptions('sq_alexa', $this->model->checkBingWTCode(SQ_Tools::getValue('sq_alexa')));
-
-
-                SQ_Tools::saveOptions('ignore_warn', (int) SQ_Tools::getValue('ignore_warn'));
-                SQ_Tools::saveOptions('sq_keyword_help', (int) SQ_Tools::getValue('sq_keyword_help'));
-                SQ_Tools::saveOptions('sq_keyword_information', (int) SQ_Tools::getValue('sq_keyword_information'));
-                SQ_Tools::saveOptions('sq_ws', (int) SQ_Tools::getValue('sq_ws'));
-
-                //update_option('blog_public', (int)SQ_Tools::getValue('sq_google_index'));
-
-                /* if there is an icon to upload */
-                if (!empty($_FILES['favicon'])) {
-
-                    $return = $this->model->addFavicon($_FILES['favicon']);
-                    if ($return['favicon'] <> '')
-                        SQ_Tools::saveOptions('favicon', $return['favicon']);
-                    if ($return['name'] <> '')
-                        SQ_Tools::saveOptions('favicon_tmp', $return['name']);
-                    if ($return['message'] <> '')
-                        define('SQ_MESSAGE_FAVICON', $return['message']);
-                }
-
-                /* Generate the sitemap */
-                if (SQ_Tools::getValue('sq_use'))
-                    add_action('admin_footer', array(SQ_ObjController::getController('SQ_Sitemap', false), 'generateSitemap'), 9999, 1);
-
-                break;
-            case 'sq_fixautoseo':
-                SQ_Tools::saveOptions('sq_use', 1);
-                break;
-            case 'sq_fixprivate':
-                update_option('blog_public', 1);
-                break;
-
-            case 'sq_fixcomments':
-                update_option('comments_notify', 1);
-                break;
-            case 'sq_fixpermalink':
-                $GLOBALS['wp_rewrite'] = new WP_Rewrite();
-                global $wp_rewrite;
-                $permalink_structure = ((get_option('permalink_structure') <> '') ? get_option('permalink_structure') : '/') . "%postname%/";
-                $wp_rewrite->set_permalink_structure($permalink_structure);
-                $permalink_structure = get_option('permalink_structure');
-
-                flush_rewrite_rules();
-                break;
-            case 'sq_warnings_off':
-                SQ_Tools::saveOptions('ignore_warn', 1);
-                break;
-            case 'sq_get_snippet':
-                if (SQ_Tools::getValue('url') <> '')
-                    $url = SQ_Tools::getValue('url');
-                else
-                    $url = get_bloginfo('url');
-
-                $snippet = SQ_Tools::getSnippet($url);
-
-                /* if((int)SQ_Tools::getValue('post_id') > 0)
-                  $snippet['url'] = get_permalink((int)SQ_Tools::getValue('post_id'));
-                 */
-                echo json_encode($snippet);
-                exit();
+        //Show bar to go back and finish the help
+        if ($this->is_page('edit') || strpos($_SERVER['REQUEST_URI'], 'sq_posts') !== false) {
+            if (SQ_Tools::$options['active_help'] <> '' && SQ_Tools::$options['ignore_warn'] == 0) {
+                SQ_Error::setError('Go back and complete the Squirrly Tasks for today <a href="admin.php?page=sq_' . SQ_Tools::$options['active_help'] . '" class="sq_button" title="Continue the Help">Continue</a>', 'helpnotice');
+            }
         }
     }
 
-}
+    /**
+     * Is the user on page name? Default name = post edit page
+     * name = 'quirrly'
+     *
+     * @global array $pagenow
+     * @param string $name
+     * @return boolean
+     */
+    public function is_page($name = '') {
+        global $pagenow;
+        $page = array();
+        //make sure we are on the backend
+        if (is_admin() && $name <> '') {
+            if ($name == 'edit') {
+                $page = array('post.php', 'post-new.php');
+            } else {
+                array_push($page, $name . '.php');
+            }
 
-?>
+            return in_array($pagenow, $page);
+        }
+
+        return false;
+    }
+
+}
