@@ -17,7 +17,13 @@ class SQ_Frontend extends SQ_FrontController {
             /* Check if sitemap is on  */
             if (SQ_Tools::$options['sq_auto_sitemap'] == 1) {
                 /* Load the Sitemap  */
+                add_filter('rewrite_rules_array', array($this, 'rewrite_rules'), 1, 1);
                 SQ_ObjController::getController('SQ_Sitemaps');
+            }
+
+            if (SQ_Tools::$options['sq_auto_feed'] == 1) {
+                /* Load the Feed Style  */
+                SQ_ObjController::getController('SQ_Feed');
             }
 
             //validate custom arguments for favicon and sitemap
@@ -29,7 +35,7 @@ class SQ_Frontend extends SQ_FrontController {
 
                 add_action('plugins_loaded', array($this->model, 'startBuffer'));
                 //flush the header with the title and removing duplicates
-                add_action('wp_head', array($this->model, 'flushHeader'));
+                add_action('wp_head', array($this->model, 'flushHeader'),99);
                 add_action('shutdown', array($this->model, 'flushHeader'));
             }
 
@@ -37,6 +43,15 @@ class SQ_Frontend extends SQ_FrontController {
                 add_action('the_content', array($this, 'fixFeedLinks'), 11);
             }
         }
+    }
+
+    public function rewrite_rules($wp_rewrite) {
+        if (SQ_Tools::$options['sq_auto_sitemap'] == 1) {
+            foreach (SQ_Tools::$options['sq_sitemap'] as $name => $sitemap) {
+                $rules[preg_quote($sitemap[0]) . '$'] = 'index.php?sq_feed=' . $name;
+            }
+        }
+        return array_merge($rules, $wp_rewrite);
     }
 
     private function _isAjax() {
@@ -112,12 +127,16 @@ class SQ_Frontend extends SQ_FrontController {
                     }
                 }
             }
-            if (!is_array($urls) || (is_array($urls) && empty($urls)))
+            if (!is_array($urls) || (is_array($urls) && empty($urls))) {
                 return $content;
+            }
 
+            $urls = array_unique($urls);
             foreach ($urls as $url) {
-                $find[] = $url;
-                $replace[] = get_bloginfo('url') . $url;
+                $find[] = "'" . $url . "'";
+                $replace[] = "'" . esc_url(get_bloginfo('url') . $url) . "'";
+                $find[] = '"' . $url . '"';
+                $replace[] = '"' . esc_url(get_bloginfo('url') . $url) . '"';
             }
             if (!empty($find) && !empty($replace)) {
                 $content = str_replace($find, $replace, $content);
@@ -134,35 +153,46 @@ class SQ_Frontend extends SQ_FrontController {
      * @return $vars
      */
     public function validateParams($vars) {
-        $vars[] = 'feed';
-        $vars[] = 'sq_get';
-        $vars[] = 'sq_size';
+        array_push($vars, 'sq_feed');
+        array_push($vars, 'sq_get');
+        array_push($vars, 'sq_size');
         return $vars;
     }
 
     public function action() {
-        switch (get_query_var('sq_get')) {
-            case 'favicon':
-                if (SQ_Tools::$options['favicon'] <> '') {
-                    //show the favico file
-                    SQ_Tools::setHeader('ico');
-                    readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon']);
-                    exit();
-                }
-                break;
-            case 'touchicon':
-                $size = get_query_var('sq_size');
-                if (SQ_Tools::$options['favicon'] <> '') {
-                    //show the favico file
-                    SQ_Tools::setHeader('png');
-                    if ($size <> '') {
-                        readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon'] . get_query_var('sq_size'));
-                    } else {
+        global $wp_query;
+        if (!empty($wp_query->query_vars["sq_get"])) {
+            $wp_query->is_404 = false;
+
+
+            switch (get_query_var('sq_get')) {
+                case 'favicon':
+                    if (SQ_Tools::$options['favicon'] <> '') {
+                        //show the favico file
+                        SQ_Tools::setHeader('ico');
                         readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon']);
+                        exit();
                     }
+                    break;
+                case 'touchicon':
+                    $size = get_query_var('sq_size');
+                    if (SQ_Tools::$options['favicon'] <> '') {
+                        //show the favico file
+                        SQ_Tools::setHeader('png');
+                        if ($size <> '') {
+                            readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon'] . get_query_var('sq_size'));
+                        } else {
+                            readfile(_SQ_CACHE_DIR_ . SQ_Tools::$options['favicon']);
+                        }
+                        exit();
+                    }
+                    break;
+
+                case 'feedcss':
+                    readfile(_SQ_THEME_DIR_ . 'css/' . 'sq_feed.css');
                     exit();
-                }
-                break;
+                    break;
+            }
         }
     }
 

@@ -81,7 +81,8 @@ class Model_SQ_Sitemaps {
      * @return type
      */
     public function getListPosts() {
-
+        global $wp_query;
+        $wp_query->get_posts();
         $posts = array();
         $posts['contains'] = array();
         if (have_posts()) {
@@ -160,6 +161,9 @@ class Model_SQ_Sitemaps {
      * @return type
      */
     public function getListNews() {
+        global $wp_query;
+        $wp_query->get_posts();
+
         $posts = array();
         $posts['contains'] = array();
 
@@ -270,6 +274,9 @@ class Model_SQ_Sitemaps {
         if (!empty($terms)) {
             foreach ($terms AS $term) {
                 $xml = array();
+                if (!isset($term->lastmod)){
+                    continue;
+                }
 
                 $xml['loc'] = esc_url(get_term_link($term, $term->taxonomy));
                 $xml['lastmod'] = date('Y-m-d\TH:i:s+00:00', $term->lastmod);

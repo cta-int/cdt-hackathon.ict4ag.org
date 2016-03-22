@@ -269,6 +269,7 @@ function sq_submitSettings() {
                 sq_linkedin_account: jQuery('#sq_settings').find('input[name=sq_linkedin_account]').val(),
 //--
                 sq_auto_sitemap: jQuery('#sq_settings').find('input[name=sq_auto_sitemap]:checked').val(),
+                sq_auto_feed: jQuery('#sq_settings').find('input[name=sq_auto_feed]:checked').val(),
                 sq_sitemap: sq_sitemap,
                 sq_sitemap_show: sq_sitemap_show,
                 sq_sitemap_frequency: jQuery('#sq_settings').find('select[name=sq_sitemap_frequency] option:selected').val(),

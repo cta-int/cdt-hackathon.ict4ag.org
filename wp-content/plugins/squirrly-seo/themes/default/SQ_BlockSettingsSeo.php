@@ -17,7 +17,7 @@
         <form id="sq_settings_form" name="settings" action="" method="post" enctype="multipart/form-data">
             <div id="sq_settings_body">
                 <fieldset>
-                    <legend style="height: 370px;">
+                    <legend style="height: 405px;">
                         <span class="sq_legend_title"><?php _e('Let Squirrly SEO optimize this blog', _SQ_PLUGIN_NAME_); ?></span>
                         <span><?php echo sprintf(__('%sIs Squirrly SEO better then WordPress SEO by Yoast?%s', _SQ_PLUGIN_NAME_), '<a href="http://www.squirrly.co/why_is_squirrly_seo_better_then_wordpress_seo_by_yoast-pagblog-article_id61980-html" target="_blank"><strong>', '</strong></a>'); ?></span>
 
@@ -85,6 +85,23 @@
                                         <span class="sq_switch-selection"></span>
                                     </div>
                                     <span><?php echo sprintf(__('adds the <strong>%sXML Sitemap%s</strong> for search engines: %s', _SQ_PLUGIN_NAME_), '<a href="https://support.google.com/webmasters/answer/156184?rd=1" target="_blank">', '</a>', '<strong><a href="' . SQ_ObjController::getController('SQ_Sitemaps')->getXmlUrl('sitemap') . '" target="_blank">' . SQ_ObjController::getController('SQ_Sitemaps')->getXmlUrl('sitemap') . '</a></strong>'); ?></span>
+                                </div>
+                            </li>
+                            <li>
+                                <?php
+                                $auto_option = false;
+                                if (SQ_Tools::$options['sq_auto_feed'] == 1)
+                                    $auto_option = true;
+                                ?>
+                                <div class="sq_option_content sq_option_content_small">
+                                    <div class="sq_switch sq_seo_switch_condition" style="<?php echo ((SQ_Tools::$options['sq_use'] == 0) ? 'display:none;' : ''); ?>">
+                                        <input id="sq_auto_feed1" type="radio" class="sq_switch-input" name="sq_auto_feed"  value="1" <?php echo ($auto_option ? "checked" : '') ?> />
+                                        <label for="sq_auto_feed1" class="sq_switch-label sq_switch-label-off"><?php _e('Yes', _SQ_PLUGIN_NAME_); ?></label>
+                                        <input id="sq_auto_feed0" type="radio" class="sq_switch-input" name="sq_auto_feed" value="0" <?php echo (!$auto_option ? "checked" : '') ?> />
+                                        <label for="sq_auto_feed0" class="sq_switch-label sq_switch-label-on"><?php _e('No', _SQ_PLUGIN_NAME_); ?></label>
+                                        <span class="sq_switch-selection"></span>
+                                    </div>
+                                    <span><?php echo __('adds  <strong>Feed style</strong> to your blog feed (eg. /feed)', _SQ_PLUGIN_NAME_) ?></span>
                                 </div>
                             </li>
                             <li>

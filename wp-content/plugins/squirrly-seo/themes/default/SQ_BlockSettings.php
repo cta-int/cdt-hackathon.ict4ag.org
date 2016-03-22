@@ -221,6 +221,7 @@
                                     <option value="rw"><?php _e('Rwanda', _SQ_PLUGIN_NAME_); ?> (http://www.google.rw/)</option>
                                     <option value="sh"><?php _e('Saint Helena', _SQ_PLUGIN_NAME_); ?> (http://www.google.sh/)</option>
                                     <option value="sm"><?php _e('San Marino', _SQ_PLUGIN_NAME_); ?> (http://www.google.sm/)</option>
+                                    <option value="com.sa"><?php _e('Saudi Arabia', _SQ_PLUGIN_NAME_); ?> (http://www.google.com.sa/)</option>
                                     <option value="com.sg"><?php _e('Singapore', _SQ_PLUGIN_NAME_); ?> (http://www.google.com.sg/)</option>
                                     <option value="sk"><?php _e('Slovakia', _SQ_PLUGIN_NAME_); ?> (http://www.google.sk/)</option>
                                     <option value="co.za"><?php _e('South Africa', _SQ_PLUGIN_NAME_); ?> (http://www.google.co.za/)</option>

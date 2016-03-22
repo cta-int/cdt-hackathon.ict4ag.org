@@ -14,24 +14,19 @@ class SQ_Sitemaps extends SQ_FrontController {
     public function __construct() {
         parent::__construct();
         add_filter('template_redirect', array($this, 'hookPreventRedirect'), 1, 0);
-        add_filter('request', array($this, 'feedRequest'));
         add_filter('user_trailingslashit', array($this, 'untrailingslashit'));
         add_action('sq_processPing', array($this, 'processCron'));
     }
 
-    public function feedHeader($content_type, $type) {
-        if (empty($type)) {
-            $type = get_default_feed();
+    public function hookPreventRedirect() {
+        global $wp_query;
+        if (!empty($wp_query->query_vars["sq_feed"])) {
+            $wp_query->is_404 = false;
+            $wp_query->is_feed = true;
+            $this->feedRequest($wp_query->query_vars);
+            $this->showSitemap();
+            exit();
         }
-
-        $types = array(
-            'rss' => 'application/rss+xml',
-            'rss2' => 'application/rss+xml',
-            'rss-http' => 'text/xml',
-            'atom' => 'application/xml',
-            'rdf' => 'application/rdf+xml'
-        );
-        $content_type = (!empty($types[$type]) ) ? $types[$type] : 'application/octet-stream';
     }
 
     public function refreshSitemap($new_status, $old_status, $post) {
@@ -42,26 +37,22 @@ class SQ_Sitemaps extends SQ_FrontController {
         }
     }
 
-    public function hookPreventRedirect() {
-        global $wp_query;
-        if (!empty($wp_query->query_vars["feed"]) || !empty($wp_query->query_vars["sq_get"])) {
-            $wp_query->is_404 = false;
-            $wp_query->is_feed = true;
-        }
-    }
-
-
     /**
      * Listen the feed call from wordpress
      * @param array $request
      * @return array
      */
     public function feedRequest($request) {
+        global $wp_query;
 
-        if (isset($request['feed']) && strpos($request['feed'], 'sitemap') !== false) {
+        if (!empty($request['feed'])) {
+            $request['sq_feed'] = $request['feed'];
+        }
+
+        if (isset($request['sq_feed']) && strpos($request['sq_feed'], 'sitemap') !== false) {
             @ini_set('memory_limit', '512M');
 
-            $this->model->type = $request['feed'];
+            $this->model->type = $request['sq_feed'];
 
             //show products
             if ($this->model->type == 'sitemap-product') {
@@ -72,7 +63,7 @@ class SQ_Sitemaps extends SQ_FrontController {
 
             if (isset(SQ_Tools::$options['sq_sitemap'][$this->model->type]) && SQ_Tools::$options['sq_sitemap'][$this->model->type][1] == 1) {
 
-                add_action('do_feed_' . $request['feed'], array($this, 'showSitemap'));
+                add_action('do_feed_' . $request['sq_feed'], array($this, 'showSitemap'));
                 //PREPARE CUSTOM QUERIES
                 switch ($this->model->type) {
 
@@ -83,19 +74,24 @@ class SQ_Sitemaps extends SQ_FrontController {
                     case 'sitemap-category':
                     case 'sitemap-post_tag':
                     case 'sitemap-custom-tax':
-                        add_filter("get_terms_fields", array($this, 'customTaxFilter'), 5, 2);
+                        remove_all_filters('terms_clauses'); //prevent language filters
+                        add_filter('get_terms_fields', array($this, 'customTaxFilter'), 5, 2);
+
+                        break;
+                    case 'sitemap-post':
+                        add_action('parse_query', array($this, 'postFilter'), 99);
                         break;
                     case 'sitemap-page':
-                        add_filter('pre_get_posts', array($this, 'pageFilter'), 5, 1);
+                        add_action('parse_query', array($this, 'pageFilter'), 99);
                         break;
                     case 'sitemap-author':
                         add_filter('sq-sitemap-authors', array($this, 'authorFilter'), 5);
                         break;
                     case 'sitemap-custom-post':
-                        add_filter('pre_get_posts', array($this, 'customPostFilter'), 5, 1);
+                        add_action('parse_query', array($this, 'customPostFilter'), 99);
                         break;
                     case 'sitemap-product':
-                        add_filter('pre_get_posts', array($this, 'productFilter'), 5, 1);
+                        add_action('parse_query', array($this, 'productFilter'), 99);
                         break;
                     case 'sitemap-archive':
                         add_filter('sq-sitemap-archive', array($this, 'archiveFilter'), 5);
@@ -105,6 +101,7 @@ class SQ_Sitemaps extends SQ_FrontController {
                 add_filter('post_limits', array($this, 'setLimits'));
             }
         }
+
         return $request;
     }
 
@@ -183,7 +180,6 @@ class SQ_Sitemaps extends SQ_FrontController {
      * @return string
      */
     public function showSitemap() {
-
         switch ($this->model->type) {
             case 'sitemap':
                 $this->showSitemapHeader();
@@ -225,8 +221,6 @@ class SQ_Sitemaps extends SQ_FrontController {
                 $this->showPackXml($this->model->getListPosts());
                 break;
         }
-
-        exit();
     }
 
     /**
@@ -309,7 +303,7 @@ class SQ_Sitemaps extends SQ_FrontController {
      */
     public function getXmlUrl($sitemap) {
         if (!get_option('permalink_structure')) {
-            $sitemap = '?feed=' . str_replace('.xml', '', $sitemap);
+            $sitemap = '?sq_feed=' . str_replace('.xml', '', $sitemap);
         } else {
             if (isset(SQ_Tools::$options['sq_sitemap'][$sitemap])) {
                 $sitemap = SQ_Tools::$options['sq_sitemap'][$sitemap][0];
@@ -381,7 +375,11 @@ class SQ_Sitemaps extends SQ_FrontController {
         return $request; // trailingslashit($request);
     }
 
-    function customTaxFilter($query) {
+    public function postFilter(&$query) {
+        $query->set('tax_query', array());
+    }
+
+    public function customTaxFilter($query) {
         global $wpdb;
 
         $query[] = "(SELECT
@@ -393,17 +391,18 @@ class SQ_Sitemaps extends SQ_FrontController {
         return $query;
     }
 
-    function pageFilter($query) {
+    public function pageFilter(&$query) {
         $query->set('post_type', array('page'));
+        $query->set('tax_query', array());
     }
 
-    function authorFilter() {
+    public function authorFilter() {
         //get only the author with posts
         add_filter('pre_user_query', array($this, 'userFilter'));
         return get_users();
     }
 
-    function userFilter($query) {
+    public function userFilter($query) {
         $query->query_fields .= ',p.lastmod';
         $query->query_from .= ' LEFT OUTER JOIN (
             SELECT MAX(post_modified) as lastmod, post_author, COUNT(*) as post_count
@@ -414,7 +413,7 @@ class SQ_Sitemaps extends SQ_FrontController {
         $query->query_where .= ' AND post_count  > 0 ';
     }
 
-    function customPostFilter($query) {
+    public function customPostFilter(&$query) {
         $types = get_post_types();
         foreach (array('post', 'page', 'attachment', 'revision', 'nav_menu_item', 'product', 'wpsc-product') as $exclude) {
             if (in_array($exclude, $types)) {
@@ -435,16 +434,18 @@ class SQ_Sitemaps extends SQ_FrontController {
         }
 
         $query->set('post_type', $types); // id of page or post
+        $query->set('tax_query', array());
     }
 
-    function productFilter($query) {
+    public function productFilter(&$query) {
         if (!$types = SQ_ObjController::getModel('SQ_BlockSettingsSeo')->isEcommerce()) {
             $types = array('custom-post');
         }
         $query->set('post_type', $types); // id of page or post
+        $query->set('tax_query', array());
     }
 
-    function archiveFilter() {
+    public function archiveFilter() {
         global $wpdb;
         $archives = $wpdb->get_results("
                         SELECT DISTINCT YEAR(post_date_gmt) as `year`, MONTH(post_date_gmt) as `month`, max(post_date_gmt) as lastmod, count(ID) as posts

@@ -9,9 +9,6 @@ Donate link: https://www.squirrly.co/wordpress-seo-by-squirrly
 SEO Plugin By Squirrly is for the NON-SEO experts. Get Excellent Seo with Better Content, Ranking and Analytics. For Both Humans and Search Bots.
 
 == Description ==
-**Thank you for all your wonderful feedback. We wish you Happy Holidays and a magnificent Happy New Year!**
-[youtube https://www.youtube.com/watch?v=I_HbBqdGry4]
-
 Squirrly SEO helps you write content that is SEO friendly and ALSO Human friendly. You'll get to improve your rankings, while providing your readers with great content. See Your SEO Stats, get a weekly SEO Audit and find the best keywords.
 
 It works well with Wordpress sites that already have <strong>Yoast</strong> or <strong>All In One SEO</strong>. You can opt-in to keep those settings, so no need to start over again :-)
@@ -140,6 +137,34 @@ Type a keyword to the right of the screen and start using Squirrly Seo. Enjoy!
 Squirrly 5.2.8 it's a stable version of Squirrly SEO and has all the SEO requirements by Search Engines
 
 == Changelog ==
+= 6.0.5 =
+* Fixed the Json AMP for articles
+* Added dateModified, ImageObject, mainEntityOfPage, publisher
+
+= 6.0.4 =
+* Fixed the snippet to save long text
+* Fixed the woocommerce title and description for a category
+* Fix the SEO for more themes
+
+= 6.0.3 =
+* Fixed compatibility with NextGen Gallery plugin
+* Compatible with 4.4.3
+
+= 6.0.2 =
+* Added style for the site feed in Squirrly > SEO
+* Fixed the hook for feed when Squirrly SEO sitemap is active
+* Fixed the SEO for more WP themes
+
+= 6.0.0 =
+* The last stable version of Squirrly with all the features included:
+* Squirrly SEO is compatible with more WP themes
+* Twitter Card latest updates  (summary and summary_large_image)
+* Open Graph updates (multiple images, videos)
+* Sitemap with more video like Wistia.com, FLV
+* External Canonical Link
+* Woocommerce & Instapage compatility
+* Compatible with WP 4.4.1
+
 = 5.3.1 =
 * Added the Twitter Summary Type option in Squirrly > SEO > Twitter Card
 * Fixed the same Title SEO issues for some WP themes
@@ -392,7 +417,7 @@ Lynn Silva - Content Writer
 Teodora Vingan - SEO Analyser
 Ana Darstaru - Chief of Customer Service
 Lucian Nertan - VP of Agency
-Sorel Nagy- Developer
+Sorel Nagy - Developer
 
 Investors:
 Ibrahim Evsan, serial entrepreneur, one of the best known bloggers in Germany

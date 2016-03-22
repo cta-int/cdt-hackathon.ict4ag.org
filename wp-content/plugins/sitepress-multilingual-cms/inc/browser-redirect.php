@@ -13,9 +13,9 @@ class WPML_Browser_Redirect{
     static function scripts(){
         global $sitepress, $sitepress_settings;
          
-        // Enque javascripts
-        wp_enqueue_script('jquery.cookie', ICL_PLUGIN_URL . '/res/js/jquery.cookie.js', array('jquery'), ICL_SITEPRESS_VERSION);
-        wp_enqueue_script('wpml-browser-redirect', ICL_PLUGIN_URL . '/res/js/browser-redirect.js', array('jquery', 'jquery.cookie'), ICL_SITEPRESS_VERSION);
+        // Enqueue javascripts
+        wp_register_script('jquery.cookie', ICL_PLUGIN_URL . '/res/js/jquery.cookie.js', array('jquery'), ICL_SITEPRESS_VERSION);
+        wp_register_script('wpml-browser-redirect', ICL_PLUGIN_URL . '/res/js/browser-redirect.js', array('jquery', 'jquery.cookie'), ICL_SITEPRESS_VERSION);
             
         $args['skip_missing'] = intval($sitepress_settings['automatic_redirect'] == 1);
         
@@ -23,7 +23,18 @@ class WPML_Browser_Redirect{
         $languages      = $sitepress->get_ls_languages($args);
         $language_urls  = array();
         foreach($languages as $language) {
-            $language_urls[$language['language_code']] = $language['url'];
+			if(isset($language['default_locale']) && $language['default_locale']) {
+				$language_urls[$language['default_locale']] = $language['url'];
+				$language_parts = explode('_', $language['default_locale']);
+				if(count($language_parts)>1) {
+					foreach($language_parts as $language_part) {
+						if(!isset($language_urls[$language_part])) {
+							$language_urls[$language_part] = $language['url'];
+						}
+					}
+				}
+			}
+			$language_urls[$language['language_code']] = $language['url'];
         }
         // Cookie parameters
         $http_host = $_SERVER['HTTP_HOST'] == 'localhost' ? '' : $_SERVER['HTTP_HOST'];
@@ -41,7 +52,7 @@ class WPML_Browser_Redirect{
             'cookie'            => $cookie            
         );
         wp_localize_script('wpml-browser-redirect', 'wpml_browser_redirect_params', $params);        
-        
+        wp_enqueue_script('wpml-browser-redirect');
         
     }
     
@@ -49,5 +60,3 @@ class WPML_Browser_Redirect{
 }
 
 add_action('init', array('WPML_Browser_Redirect', 'init'));
-
-?>

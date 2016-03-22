@@ -322,6 +322,7 @@ class Model_SQ_BlockSettingsSeo {
                         $ico->remove_ico($path . "/" . 'favicon.ico');
                     }
                     if (!is_multisite()) {
+                        $ico = SQ_ObjController::getModel('SQ_Ico');
                         $ico->save_ico($path . "/" . 'favicon.ico');
                     }
                 }

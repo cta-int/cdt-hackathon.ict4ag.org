@@ -140,7 +140,6 @@ class Model_SQ_BlockPostsAnalytics extends WP_List_Table {
         $query['post__in'] = (array) $post__in;
 
         wp($query);
-        //echo '<pre>' . print_r($wp_query, true) . '</pre>';
         return $avail_post_stati;
     }
 

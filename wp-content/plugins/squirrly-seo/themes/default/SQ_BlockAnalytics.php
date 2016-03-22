@@ -32,7 +32,6 @@
                             foreach ($audit as $key => $task) {
                                 $task->id = $view->post_id . $task->id;
                                 $replace = '';
-                                //echo '<pre>' . print_R($task->value, true) . '</pre>';
                                 if (is_array($task->value)) {
                                     foreach ($task->value as $value) {
                                         if (is_object($value)) {

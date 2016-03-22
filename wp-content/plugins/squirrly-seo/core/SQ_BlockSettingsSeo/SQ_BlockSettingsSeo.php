@@ -52,7 +52,7 @@ class SQ_BlockSettingsSeo extends SQ_BlockController {
                 /////////////////////////////SOCIAL OPTION
                 SQ_Tools::saveOptions('sq_auto_facebook', (int) SQ_Tools::getValue('sq_auto_facebook'));
                 SQ_Tools::saveOptions('sq_auto_twitter', (int) SQ_Tools::getValue('sq_auto_twitter'));
-                SQ_Tools::saveOptions('sq_auto_twittersize',  SQ_Tools::getValue('sq_auto_twittersize'));
+                SQ_Tools::saveOptions('sq_auto_twittersize', SQ_Tools::getValue('sq_auto_twittersize'));
                 SQ_Tools::saveOptions('sq_og_locale', SQ_Tools::getValue('sq_og_locale'));
 
                 SQ_Tools::saveOptions('sq_twitter_account', $this->model->checkTwitterAccount(SQ_Tools::getValue('sq_twitter_account')));
@@ -88,6 +88,7 @@ class SQ_BlockSettingsSeo extends SQ_BlockController {
                 ///////////////////////////////////////////
                 /////////////////////////////SITEMAP OPTION
                 SQ_Tools::saveOptions('sq_auto_sitemap', (int) SQ_Tools::getValue('sq_auto_sitemap'));
+                SQ_Tools::saveOptions('sq_auto_feed', (int) SQ_Tools::getValue('sq_auto_feed'));
                 SQ_Tools::saveOptions('sq_sitemap_frequency', SQ_Tools::getValue('sq_sitemap_frequency'));
                 SQ_Tools::saveOptions('sq_sitemap_ping', (int) SQ_Tools::getValue('sq_sitemap_ping'));
 
@@ -296,9 +297,13 @@ class SQ_BlockSettingsSeo extends SQ_BlockController {
             if (SQ_Tools::$options['sq_auto_sitemap'] == 1) {
                 foreach (SQ_Tools::$options['sq_sitemap'] as $name => $sitemap) {
                     if ($sitemap[1] == 1 || $sitemap[1] == 2) { // is show sitemap
-                        $rules[preg_quote($sitemap[0])] = 'index.php?feed=' . $name;
+                        $rules[preg_quote($sitemap[0])] = 'index.php?sq_feed=' . $name;
                     }
                 }
+            }
+
+            if (SQ_Tools::$options['sq_auto_feed'] == 1) {
+                $rules['sqfeedcss$'] = 'index.php?sq_get=feedcss';
             }
         }
         return array_merge($rules, $wp_rewrite);

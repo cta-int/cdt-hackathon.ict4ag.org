@@ -79,6 +79,7 @@ class SQ_Tools extends SQ_FrontController {
             // --
             'sq_auto_canonical' => 1,
             'sq_auto_sitemap' => 0,
+            'sq_auto_feed' => 0,
             'sq_auto_jsonld' => 0,
             'sq_jsonld_type' => 'Organization',
             'sq_jsonld' => array(
@@ -336,7 +337,14 @@ class SQ_Tools extends SQ_FrontController {
             $url .= ((strpos($url, "?") === false) ? "?" : "&") . $parameters;
 
         //send the cookie for preview
-        if ($url_domain == $_SERVER['HTTP_HOST'] && strpos($url, 'preview=true') !== false) {
+        $server_domain = '';
+        if (isset($_SERVER['HTTP_HOST'])){
+            $server_domain = $_SERVER['HTTP_HOST'];
+        }elseif (isset($_SERVER['SERVER_NAME'])){
+            $server_domain = $_SERVER['SERVER_NAME'];
+        }
+
+        if ($url_domain == $server_domain && strpos($url, 'preview=true') !== false) {
             foreach ($_COOKIE as $name => $value) {
                 if (strpos($name, 'wordpress') !== false || strpos($name, 'wp') !== false || strpos($name, 'slimstat') !== false || strpos($name, 'sforum') !== false) {
                     $cookies[] = new WP_Http_Cookie(array('name' => $name, 'value' => $value));
@@ -896,7 +904,7 @@ class SQ_Tools extends SQ_FrontController {
 
         echo PHP_EOL . " Load: {$memory_avail} (avail) / {$memory_used}M (used) / {$memory_peak}M (peak)";
         echo "  | Time: {$run_time}s | {$pps} req/sec";
-        echo "<pre>" . print_r($wp_query,true).  "</pre>";
+        echo "<pre>" . print_r($wp_query, true) . "</pre>";
     }
 
     public function sq_activate() {
@@ -945,6 +953,9 @@ class SQ_Tools extends SQ_FrontController {
             $wpdb->query("UPDATE " . $wpdb->postmeta . " SET `meta_key` = '_sq_post_keyword' WHERE `meta_key` = 'sq_post_keyword'");
 
             self::saveOptions('sq_ver', SQ_VERSION_ID);
+
+            global $wp_rewrite;
+            $wp_rewrite->flush_rules();
         }
     }
 
