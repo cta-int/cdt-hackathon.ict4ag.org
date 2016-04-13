@@ -137,10 +137,8 @@ function icl_get_languages( $a = '' ) {
 function wpml_get_active_languages_filter( $empty_value, $args = '' ) {
 	global $sitepress;
 
-	$args = wp_parse_args( $args );
-	$langs = $sitepress->get_ls_languages( $args );
-
-	return $langs;
+	$args  = wp_parse_args( $args );
+	return $sitepress->get_ls_languages( $args );
 }
 
 /**

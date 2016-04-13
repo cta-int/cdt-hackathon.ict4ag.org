@@ -326,21 +326,29 @@ class SQ_Tools extends SQ_FrontController {
         $cookie_string = '';
 
         $url_domain = parse_url($url);
-        $url_domain = $url_domain['host'];
+        if (isset($url_domain['host'])) {
+            $url_domain = $url_domain['host'];
+        } else {
+            $url_domain = '';
+        }
 
-        if (isset($param))
+        if (isset($param)) {
             foreach ($param as $key => $value) {
-                if (isset($key) && $key <> '' && $key <> 'timeout')
+                if (isset($key) && $key <> '' && $key <> 'timeout') {
                     $parameters .= ($parameters == "" ? "" : "&") . $key . "=" . $value;
+                }
             }
-        if ($parameters <> '')
+        }
+
+        if ($parameters <> '') {
             $url .= ((strpos($url, "?") === false) ? "?" : "&") . $parameters;
+        }
 
         //send the cookie for preview
         $server_domain = '';
-        if (isset($_SERVER['HTTP_HOST'])){
+        if (isset($_SERVER['HTTP_HOST'])) {
             $server_domain = $_SERVER['HTTP_HOST'];
-        }elseif (isset($_SERVER['SERVER_NAME'])){
+        } elseif (isset($_SERVER['SERVER_NAME'])) {
             $server_domain = $_SERVER['SERVER_NAME'];
         }
 
@@ -372,22 +380,92 @@ class SQ_Tools extends SQ_FrontController {
     }
 
     /**
+     * Connect remote with CURL if exists
+     */
+    public static function sq_remote_post($url, $param = array(), $options = array()) {
+        $parameters = '';
+        $cookies = array();
+        $cookie_string = '';
+
+        $url_domain = parse_url($url);
+        if (isset($url_domain['host'])) {
+            $url_domain = $url_domain['host'];
+        } else {
+            $url_domain = '';
+        }
+
+        if (isset($param)) {
+            foreach ($param as $key => $value) {
+                if (isset($key) && $key <> '' && $key <> 'timeout') {
+                    $parameters .= ($parameters == "" ? "" : "&") . $key . "=" . $value;
+                }
+            }
+        }
+
+        if ($parameters <> '') {
+            $url .= ((strpos($url, "?") === false) ? "?" : "&") . $parameters;
+        }
+
+        //send the cookie for preview
+        $server_domain = '';
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $server_domain = $_SERVER['HTTP_HOST'];
+        } elseif (isset($_SERVER['SERVER_NAME'])) {
+            $server_domain = $_SERVER['SERVER_NAME'];
+        }
+
+        if ($url_domain == $server_domain && strpos($url, 'preview=true') !== false) {
+            foreach ($_COOKIE as $name => $value) {
+                $cookies[] = new WP_Http_Cookie(array('name' => $name, 'value' => $value));
+                $cookie_string .= "$name=$value;";
+            }
+        }
+
+        $options['timeout'] = (isset($options['timeout'])) ? $options['timeout'] : 30;
+        if (!isset($options['cookie_string'])) {
+            $options['cookies'] = $cookies;
+            $options['cookie_string'] = $cookie_string;
+        }
+        $options['sslverify'] = false;
+
+        if (!$response = self::sq_wpcall($url, $options, 'post')) {
+            if (function_exists('curl_init') && !ini_get('safe_mode') && !ini_get('open_basedir')) {
+                $response = self::sq_curl($url, $options, 'post');
+            } else {
+                return false;
+            }
+        }
+
+        return $response;
+    }
+
+    /**
      * Call remote UR with CURL
      * @param string $url
      * @param array $param
      * @return string
      */
-    private static function sq_curl($url, $options) {
+    private static function sq_curl($url, $options, $method = 'get') {
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, false);
         //--
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
         //--
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($ch, CURLOPT_TIMEOUT, $options['timeout']);
+
+        if ($method == 'post') {
+            curl_setopt($ch, CURLOPT_POST, 1);
+        }
+
+        if (isset($options['sslverify'])) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        }else{
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        }
 
         if (isset($options['followlocation'])) {
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -404,7 +482,7 @@ class SQ_Tools extends SQ_FrontController {
         $response = curl_exec($ch);
         $response = self::cleanResponce($response);
 
-        self::dump('CURL', $url, $options, $ch, $response); //output debug
+        self::dump('CURL', $method, $url, $options, $ch, $response); //output debug
 
         if (curl_errno($ch) == 1 || $response === false) { //if protocol not supported
             if (curl_errno($ch)) {
@@ -425,15 +503,19 @@ class SQ_Tools extends SQ_FrontController {
      * @param array $param
      * @return string
      */
-    private static function sq_wpcall($url, $options) {
-        $response = wp_remote_get($url, $options);
+    private static function sq_wpcall($url, $options, $method = 'get') {
+        if ($method == 'post') {
+            $response = wp_remote_post($url, $options);
+        } else {
+            $response = wp_remote_get($url, $options);
+        }
         if (is_wp_error($response)) {
             self::dump($response);
             return false;
         }
 
         $response = self::cleanResponce(wp_remote_retrieve_body($response)); //clear and get the body
-        self::dump('wp_remote_get', $url, $options, $response); //output debug
+        self::dump('wp_remote_get', $method, $url, $options, $response); //output debug
         return $response;
     }
 

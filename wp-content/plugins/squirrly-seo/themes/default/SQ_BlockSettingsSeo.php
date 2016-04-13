@@ -457,7 +457,7 @@
                 <fieldset id="sq_social_media_accounts" style="<?php echo ((SQ_Tools::$options['sq_use'] == 0) ? 'display:none;' : ''); ?>">
                     <legend class="sq_legend_medium">
                         <span class="sq_legend_title"><?php _e('Social Media Accounts', _SQ_PLUGIN_NAME_); ?></span>
-                        <span><?php echo sprintf(__('%sLink your Google+ profile to the content you create%s', _SQ_PLUGIN_NAME_), '<a href="https://plus.google.com/authorship" target="_blank">', '</a>'); ?></span>
+                        <span><?php echo sprintf(__('%sLink your Google+ profile to the content you create%s', _SQ_PLUGIN_NAME_), '<a href="https://developers.google.com/structured-data/" target="_blank">', '</a>'); ?></span>
                         <span><?php echo sprintf(__('%sTwitter account is mandatory for <strong>Twitter Card Validation</strong>%s', _SQ_PLUGIN_NAME_), '<a href="https://dev.twitter.com/docs/cards/validation/validator" target="_blank">', '</a>'); ?></span>
                         <span><?php echo sprintf(__('%sAdd all your social accounts for <strong>JSON-LD Semantic SEO</strong>%s', _SQ_PLUGIN_NAME_), '<a href="http://howto.squirrly.c%so/sides/squirrly-json-ld-structured-data/" target="_blank">', '</a>'); ?></span>
                         <span><?php echo sprintf(__('%sSpecify your social profiles to Google%s', _SQ_PLUGIN_NAME_), '<a href="https://developers.google.com/structured-data/customize/social-profiles" target="_blank">', '</a>'); ?></span>

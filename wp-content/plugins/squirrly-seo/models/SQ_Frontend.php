@@ -120,13 +120,23 @@ class Model_SQ_Frontend {
      */
     public function flushHeader() {
         $buffers = array();
-        if (function_exists('ob_list_handlers')) {
-            $buffers = @ob_list_handlers();
-        }
 
-        if (sizeof($buffers) > 0 && strtolower($buffers[sizeof($buffers) - 1]) == strtolower(get_class($this) . '::getBuffer')) {
-            @ob_end_flush();
-            $buffers = @ob_list_handlers();
+
+        try {
+            if (function_exists('ob_list_handlers')) {
+                $buffers = @ob_list_handlers();
+
+                if (sizeof($buffers) > 0) {
+                    if (is_string($buffers[sizeof($buffers) - 1])) {
+                        if (strtolower($buffers[sizeof($buffers) - 1]) == strtolower(get_class($this) . '::getBuffer')) {
+                            @ob_end_flush();
+                            $buffers = @ob_list_handlers();
+                        }
+                    }
+                }
+            }
+        } catch (Exception $ex) {
+            //error
         }
     }
 
@@ -188,6 +198,10 @@ class Model_SQ_Frontend {
                 }
                 if (SQ_Tools::$options['sq_auto_twitter'] == 1) {
                     $buffer = @preg_replace('/<meta[^>]*(name|property)=["\'](twitter:)[^"\'>]+["\'][^>]*content=["\'][^"\'>]+["\'][^>]*>[\n\r]*/si', '', $buffer, -1);
+                }
+
+                if (SQ_Tools::$options['sq_auto_favicon'] == 1) {
+                    $buffer = @preg_replace('/<link[^>]*rel=[^>]*(shortcut icon)[^>]*>[\n\r]*/si', '', $buffer, -1);
                 }
 
                 if (SQ_Tools::$options['sq_auto_canonical'] == 1) {
@@ -1122,12 +1136,12 @@ class Model_SQ_Frontend {
                         }
 
                         if ($key == 'logo') {
-                            if (SQ_Tools::$options['sq_jsonld_type'] == 'Person' ){
+                            if (SQ_Tools::$options['sq_jsonld_type'] == 'Person') {
                                 $key = 'image';
                             }
-                            $value = '{"@type": "ImageObject","url": "'.$value.'"}';
-                        }else{
-                            $value = '"'.$value.'"';
+                            $value = '{"@type": "ImageObject","url": "' . $value . '"}';
+                        } else {
+                            $value = '"' . $value . '"';
                         }
                         $meta .= ($meta <> '' ? $sep : '') . '"' . $key . '":' . $value . '';
                     }
@@ -1201,14 +1215,14 @@ class Model_SQ_Frontend {
                         }
 
                         if ($key == 'logo') {
-                            $value = '{"@type": "ImageObject","url": "'.$value.'"}';
-                        }else{
-                            $value = '"'.$value.'"';
+                            $value = '{"@type": "ImageObject","url": "' . $value . '"}';
+                        } else {
+                            $value = '"' . $value . '"';
                         }
                         $meta .= ($meta <> '' ? $sep : '') . '"' . $key . '":' . $value . '';
                     }
                 }
-                $meta .= '}'. $sep;
+                $meta .= '}' . $sep;
             }
             $meta .= '"keywords": ["' . str_replace(',', '","', $this->grabKeywordsFromPost()) . '"]';
 
@@ -1370,35 +1384,43 @@ class Model_SQ_Frontend {
             }
 
             if (is_home()) {
-                if (SQ_Tools::$options['sq_keywordtag'] == 1) {
-                    foreach ($wp_query->posts as $post) {
-                        foreach (wp_get_post_tags($post->ID) as $keyword) {
-                            $keywords[] = SQ_Tools::i18n($keyword->name);
+                if (isset($wp_query->posts) && !empty($wp_query->posts)) {
+                    $posts = (array) $wp_query->posts;
+
+                    if (SQ_Tools::$options['sq_keywordtag'] == 1) {
+                        foreach ($posts as $post) {
+                            foreach (wp_get_post_tags($post->ID) as $keyword) {
+                                $keywords[] = SQ_Tools::i18n($keyword->name);
+                            }
                         }
                     }
-                }
 
-                if (sizeof($keywords) > $this->max_keywords) {
-                    $keywords = array_slice($keywords, 0, $this->max_keywords);
+                    if (sizeof($keywords) > $this->max_keywords) {
+                        $keywords = array_slice($keywords, 0, $this->max_keywords);
+                    }
                 }
             }
             if (count($keywords) <= $this->max_keywords) {
-                foreach ($wp_query->posts as $post) {
-                    $id = (is_attachment()) ? ($post->post_parent) : ($post->ID);
+                if (isset($wp_query->posts) && !empty($wp_query->posts)) {
+                    $posts = (array) $wp_query->posts;
 
-                    if (SQ_Tools::$options['sq_keywordtag'] == 1) {
-                        foreach (wp_get_post_tags($id) as $keyword) {
-                            $keywords[] = SQ_Tools::i18n($keyword->name);
+                    foreach ($posts as $post) {
+                        $id = (is_attachment()) ? ($post->post_parent) : ($post->ID);
+
+                        if (SQ_Tools::$options['sq_keywordtag'] == 1) {
+                            foreach (wp_get_post_tags($id) as $keyword) {
+                                $keywords[] = SQ_Tools::i18n($keyword->name);
+                            }
                         }
-                    }
 // autometa
-                    $autometa = stripcslashes(get_post_meta($id, 'autometa', true));
-                    //$autometa = stripcslashes(get_post_meta($post->ID, "autometa", true));
-                    if (isset($autometa) && !empty($autometa)) {
+                        $autometa = stripcslashes(get_post_meta($id, 'autometa', true));
+                        //$autometa = stripcslashes(get_post_meta($post->ID, "autometa", true));
+                        if (isset($autometa) && !empty($autometa)) {
 
-                        $autometa_array = explode(' ', $autometa);
-                        foreach ($autometa_array as $e) {
-                            $keywords[] = SQ_Tools::i18n($e);
+                            $autometa_array = explode(' ', $autometa);
+                            foreach ($autometa_array as $e) {
+                                $keywords[] = SQ_Tools::i18n($e);
+                            }
                         }
                     }
                 }
@@ -1549,8 +1571,12 @@ class Model_SQ_Frontend {
         $headers = headers_list();
 
         foreach ($headers as $index => $value) {
-            list($key, $value) = explode(': ', $value);
-            $headers[$key] = $value;
+            if (strpos($value, ':') !== false) {
+                $exploded = @explode(': ', $value);
+                if (count($exploded) > 1) {
+                    $headers[$exploded[0]] = $exploded[1];
+                }
+            }
         }
 
         if (isset($headers['Content-Type'])) {

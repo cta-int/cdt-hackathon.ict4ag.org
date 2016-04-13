@@ -262,6 +262,14 @@ class WPML_WP_API {
 		return $result;
 	}
 
+	public function is_translation_queue_page() {
+		$result = is_admin()
+							&& isset( $_GET[ 'page' ] )
+							&& $_GET[ 'page' ] == WPML_TM_FOLDER . '/menu/translations-queue.php';
+
+		return $result;		
+	}
+	
 	public function is_troubleshooting_page() {
 		return $this->is_core_page( 'troubleshooting.php' );
 	}
@@ -295,6 +303,11 @@ class WPML_WP_API {
 		$action = filter_input( INPUT_POST, 'action', FILTER_SANITIZE_STRING );
 
 		return $action == 'heartbeat';
+	}
+	
+	public function is_term_edit_page() {
+		global $pagenow;
+		return $pagenow === 'term.php' || ( $pagenow === 'edit-tags.php' && isset( $_GET[ 'action' ] ) && filter_var ( $_GET[ 'action' ] ) === 'edit' );
 	}
 
 	/**
@@ -770,8 +783,49 @@ class WPML_WP_API {
 	 *
 	 * @return string
 	 */
-	function phpversion( $extension = '' ) {
+	function phpversion( $extension = null ) {
+		if ( defined( 'PHP_VERSION' ) ) {
+			return PHP_VERSION;
+		} else {
+			return phpversion( $extension );
+		}
+	}
 
-		return phpversion( $extension );
+	function array_unique( $array, $sort_flags = SORT_REGULAR ) {
+		if ( version_compare( $this->phpversion(), '5.2.9', '>=' ) ) {
+			return array_unique( $array, $sort_flags );
+		} else {
+			return $this->array_unique_fallback( $array, true );
+		}
+	}
+
+	/**
+	 * @param $array
+	 * @param $keep_key_assoc
+	 *
+	 * @return array
+	 */
+	private function array_unique_fallback( $array, $keep_key_assoc ) {
+		$duplicate_keys = array();
+		$tmp            = array();
+
+		foreach ( $array as $key => $val ) {
+			// convert objects to arrays, in_array() does not support objects
+			if ( is_object( $val ) ) {
+				$val = (array) $val;
+			}
+
+			if ( ! in_array( $val, $tmp ) ) {
+				$tmp[] = $val;
+			} else {
+				$duplicate_keys[] = $key;
+			}
+		}
+
+		foreach ( $duplicate_keys as $key ) {
+			unset( $array[ $key ] );
+		}
+
+		return $keep_key_assoc ? $array : array_values( $array );
 	}
 }
